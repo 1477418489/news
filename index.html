@@ -233,6 +233,12 @@
   .rss-item a:hover .rt{color:var(--accent)}
   .rss-item .rm{font-size:12px;color:var(--text-faint);margin-top:4px}
   .rss-item .rs{font-size:13px;color:var(--text-dim);margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}
+  .rss-filters{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 12px}
+  .rss-chip{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--text-dim);border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer;transition:.15s ease}
+  .rss-chip:hover{border-color:rgba(125,211,252,.35);color:var(--text)}
+  .rss-chip.active{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.45);color:#e0f2fe}
+  .rss-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .rss-tag{font-size:11px;line-height:1;padding:5px 8px;border-radius:999px;background:rgba(148,163,184,.12);color:var(--text-faint);border:1px solid rgba(148,163,184,.18)}
   .menu-toggle{display:none}
   @media(max-width:860px){
     .app{flex-direction:column}
@@ -1489,17 +1495,55 @@ const VIEWS = {
           return;
         }
         const home = safeURL(feed.home);
-        box.innerHTML = data.items.slice(0, 40).map(it => {
-          const href = safeURL(it.link);
-          return `<div class="rss-item">
-            ${href
-              ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer"><div class="rt">${esc(it.title||"（无标题）")}</div></a>`
-              : `<div class="rt">${esc(it.title||"（无标题）")}</div>`}
-            <div class="rm">${esc(it.date||"")}${it.author?` · ${esc(it.author)}`:""}${feed.name?` · ${esc(feed.name)}`:""}</div>
-            ${it.summary?`<div class="rs">${esc(it.summary)}</div>`:""}
-          </div>`;
-        }).join("") +
-          (home ? `<div class="note" style="margin-top:14px">来源站点：<a href="${esc(home)}" target="_blank" rel="noopener noreferrer">${esc(home)}</a></div>` : "");
+        const allItems = data.items || [];
+        const groups = buildRssCategoryGroups(allItems);
+        // 默认优先展示「全部」；若源内有更细分类，提供筛选（每日/每周/官方/社区等）
+        let activeCat = this.state.rssCat && (this.state.rssCat === "__all__" || groups.some(g => g.key === this.state.rssCat))
+          ? this.state.rssCat
+          : "__all__";
+        this.state.rssCat = activeCat;
+
+        const paint = () => {
+          const list = activeCat === "__all__"
+            ? allItems
+            : allItems.filter(it => (it.categories || []).includes(activeCat));
+          const chips = [
+            { key: "__all__", label: `全部 ${allItems.length}` },
+            ...groups.map(g => ({ key: g.key, label: `${g.key} ${g.count}` })),
+          ].map(c => `<button type="button" class="rss-chip${c.key === activeCat ? " active" : ""}" data-cat="${esc(c.key)}">${esc(c.label)}</button>`).join("");
+
+          const shown = list.slice(0, 80);
+          const more = list.length > shown.length
+            ? `<div class="note" style="margin-top:10px">已显示 ${shown.length}/${list.length} 条。切换上方分类可查看其余内容。</div>`
+            : "";
+
+          box.innerHTML = `
+            ${groups.length ? `<div class="rss-filters">${chips}</div>` : ""}
+            ${shown.map(it => {
+              const href = safeURL(it.link);
+              const tags = (it.categories || []).slice(0, 4).map(c => `<span class="rss-tag">${esc(c)}</span>`).join("");
+              return `<div class="rss-item">
+                ${href
+                  ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer"><div class="rt">${esc(it.title||"（无标题）")}</div></a>`
+                  : `<div class="rt">${esc(it.title||"（无标题）")}</div>`}
+                <div class="rm">${esc(it.date||"")}${it.author?` · ${esc(it.author)}`:""}${feed.name?` · ${esc(feed.name)}`:""}</div>
+                ${tags ? `<div class="rss-tags">${tags}</div>` : ""}
+                ${it.summary?`<div class="rs">${esc(it.summary)}</div>`:""}
+              </div>`;
+            }).join("")}
+            ${more}
+            ${home ? `<div class="note" style="margin-top:14px">来源站点：<a href="${esc(home)}" target="_blank" rel="noopener noreferrer">${esc(home)}</a></div>` : ""}
+          `;
+
+          box.querySelectorAll(".rss-chip").forEach(btn => {
+            btn.onclick = () => {
+              activeCat = btn.getAttribute("data-cat") || "__all__";
+              this.state.rssCat = activeCat;
+              paint();
+            };
+          });
+        };
+        paint();
       } catch (e) {
         if (e?.name === "AbortError" || !isLoadCurrent(this, token) || this.state.tab !== feedId) return;
         fail(box, e, feed.url);
@@ -1509,6 +1553,53 @@ const VIEWS = {
 };
 
 /* ================= RSS 解析（Atom / RSS 2.0） ================= */
+function collectRssCategories(el) {
+  if (!el) return [];
+  const out = [];
+  const seen = new Set();
+  const push = (v) => {
+    const s = String(v || "").trim();
+    if (!s) return;
+    const k = s.toLowerCase();
+    if (seen.has(k)) return;
+    seen.add(k);
+    out.push(s);
+  };
+  // RSS <category>text</category> / Atom <category term="...">
+  el.querySelectorAll?.("category").forEach(node => {
+    push(attrOf(node, "term") || textOf(node) || attrOf(node, "label"));
+  });
+  // some feeds put tags in dc:subject
+  try {
+    const subjects = el.getElementsByTagNameNS?.("http://purl.org/dc/elements/1.1/", "subject") || [];
+    [...subjects].forEach(n => push(textOf(n)));
+  } catch {}
+  return out;
+}
+/** 聚合分类计数，优先突出每日/每周等可读分组 */
+function buildRssCategoryGroups(items) {
+  const counts = new Map();
+  (items || []).forEach(it => {
+    (it.categories || []).forEach(c => {
+      counts.set(c, (counts.get(c) || 0) + 1);
+    });
+  });
+  if (!counts.size) return [];
+  const preferred = [
+    "开源趋势-每日热点", "开源趋势-每周热点",
+    "GitHub 日榜", "GitHub 周榜",
+    "AI 官方更新", "AI 快讯", "社区讨论",
+    "OpenAI", "Anthropic", "InfoQ AI", "TLDR AI", "Hacker News", "V2EX",
+  ];
+  const preferredSet = new Set(preferred);
+  const pref = preferred.filter(k => counts.has(k)).map(k => ({ key: k, count: counts.get(k) }));
+  const rest = [...counts.entries()]
+    .filter(([k]) => !preferredSet.has(k))
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "zh"))
+    .map(([key, count]) => ({ key, count }));
+  // 控制 chip 数量，避免刷屏
+  return [...pref, ...rest].slice(0, 16);
+}
 function textOf(el) {
   if (!el) return "";
   return (el.textContent || "").trim();
@@ -1531,10 +1622,36 @@ function stripHtmlLite(html) {
 }
 function fmtRssDate(s) {
   if (!s) return "";
-  const d = new Date(s);
-  if (isNaN(d.getTime())) return s;
-  const p = n => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  const raw = String(s).trim();
+  const pad = n => String(n).padStart(2, "0");
+
+  // ISO 8601: keep feed wall-clock, avoid local TZ rewrite
+  // e.g. 2026-07-24T07:53:43Z / 2026-07-24T15:53:43+08:00
+  let m = raw.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?(Z|[+-]\d{2}:?\d{2})?$/i);
+  if (m) return `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}`;
+
+  // RFC 822 / RSS pubDate: Fri, 24 Jul 2026 07:53:43 +0000
+  m = raw.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (m) {
+    const months = { jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12 };
+    const mon = months[m[2].toLowerCase()];
+    if (mon) return `${m[3]}-${pad(mon)}-${pad(+m[1])} ${m[4]}:${m[5]}`;
+  }
+
+  // fallback: Asia/Shanghai for stable display
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return raw;
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false,
+    }).formatToParts(d);
+    const get = (type) => (parts.find((x) => x.type === type) || {}).value || "";
+    return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
+  } catch {
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
 }
 function parseRSSXML(xmlText, sourceUrl) {
   const doc = new DOMParser().parseFromString(xmlText, "application/xml");
@@ -1561,12 +1678,14 @@ function parseRSSXML(xmlText, sourceUrl) {
         if (!itemLink) itemLink = attrOf(l, "href");
       });
       const summary = textOf(first(en, "summary")) || stripHtmlLite(textOf(first(en, "content")));
+      const categories = collectRssCategories(en);
       return {
         title: textOf(first(en, "title")),
         link: itemLink,
         date: fmtRssDate(textOf(first(en, "published")) || textOf(first(en, "updated"))),
         author: textOf(first(en, "author name")) || textOf(first(en, "author")),
         summary,
+        categories,
       };
     });
     return { title, subtitle, link, updated, items, type: "atom" };
@@ -1590,6 +1709,7 @@ function parseRSSXML(xmlText, sourceUrl) {
         date: fmtRssDate(textOf(first(it, "pubDate"))),
         author: textOf(first(it, "author")) || textOf(it.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", "creator")[0]) || textOf(it.getElementsByTagName("creator")[0]),
         summary: stripHtmlLite(textOf(first(it, "description")) || textOf(it.getElementsByTagNameNS("http://purl.org/rss/1.0/modules/content/", "encoded")[0]) || textOf(it.getElementsByTagName("encoded")[0])),
+        categories: collectRssCategories(it),
       };
     });
     return { title, subtitle, link, updated, items, type: "rss" };
