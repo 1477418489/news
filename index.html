@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日读世界 · 60s 全量资讯</title>
+<style>
+  :root {
+    --bg:#0e1014; --bg-side:#14171d; --card:rgba(255,255,255,.055); --card-2:rgba(255,255,255,.03);
+    --card-border:rgba(255,255,255,.09); --text:#e8eaed; --text-dim:#9aa0a6; --text-faint:#676d75;
+    --accent:#4f9dff; --accent-2:#a679ff; --gold:#ffc14d; --warn:#ff6b6b; --green:#4ade80;
+    --shadow:0 8px 30px rgba(0,0,0,.3); --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+
+  .app{display:flex;min-height:100vh}
+  .sidebar{width:210px;flex:none;background:var(--bg-side);border-right:1px solid var(--card-border);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side-brand{padding:22px 20px 14px}
+  .side-brand h1{font-size:20px;font-weight:800;letter-spacing:-.4px;
+    background:linear-gradient(120deg,#fff,#9cc4ff 60%,#c6a8ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .side-brand p{color:var(--text-faint);font-size:11.5px;margin-top:3px}
+  .side-date{padding:0 20px 14px;border-bottom:1px solid var(--card-border);margin-bottom:6px}
+  .side-date .d{font-size:15px;font-weight:700}
+  .side-date .w{color:var(--text-dim);font-size:12px}
+  .nav{list-style:none;padding:4px 10px;flex:1}
+  .nav li{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;cursor:pointer;
+    color:var(--text-dim);font-size:14px;transition:.18s;margin-bottom:2px;user-select:none}
+  .nav li .ic{font-size:16px;width:20px;text-align:center;flex:none}
+  .nav li:hover{background:rgba(255,255,255,.05);color:var(--text)}
+  .nav li.active{background:linear-gradient(135deg,rgba(79,157,255,.2),rgba(166,121,255,.18));color:#fff;font-weight:600}
+  .side-foot{padding:14px 20px 18px;font-size:11px;color:var(--text-faint)}
+  .side-foot a{color:var(--text-dim)} .side-foot a:hover{color:var(--accent)}
+
+  .main{flex:1;min-width:0;overflow-x:hidden}
+  .main-inner{max-width:1180px;margin:0 auto;padding:26px 26px 70px}
+  .view-head{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .view-head h2{font-size:22px;font-weight:800}
+  .view-head .refresh{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:var(--card);
+    border:1px solid var(--card-border);color:var(--text);padding:7px 14px;border-radius:999px;cursor:pointer;font-size:13px;transition:.2s}
+  .view-head .refresh:hover{background:rgba(255,255,255,.11)}
+  .view-head .refresh.spin svg{animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .view-desc{color:var(--text-faint);font-size:13px;margin-bottom:18px}
+
+  .subtabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+  .subtab{font-size:13px;padding:6px 14px;border-radius:999px;cursor:pointer;color:var(--text-dim);
+    background:var(--card);border:1px solid var(--card-border);transition:.2s}
+  .subtab:hover{color:var(--text)}
+  .subtab.active{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent}
+
+  .grid{display:grid;gap:18px;grid-template-columns:repeat(12,1fr);align-items:start}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);overflow:hidden;animation:rise .35s ease both}
+  .card:hover{border-color:rgba(255,255,255,.16)}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-5{grid-column:span 5}
+  .col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}
+  .col-9{grid-column:span 9}.col-12{grid-column:span 12}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .card-head .ico{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:15px;
+    background:linear-gradient(135deg,rgba(79,157,255,.22),rgba(166,121,255,.22))}
+  .card-head h3{font-size:15px;font-weight:700}
+  .card-head .sub{color:var(--text-faint);font-size:12px;margin-left:auto;text-align:right}
+
+  .moyu-info{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .chip{font-size:12px;padding:3px 11px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--card-border)}
+  .chip.hot{color:var(--gold);border-color:rgba(255,193,77,.3);background:rgba(255,193,77,.08)}
+  .prog{margin-bottom:11px}.prog:last-child{margin-bottom:0}
+  .prog .lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin-bottom:5px}
+  .prog .lbl b{color:var(--text)}
+  .prog .track{height:7px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+  .prog .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+
+  .news-list{counter-reset:n;list-style:none}
+  .news-list li{counter-increment:n;position:relative;padding:8px 0 8px 32px;font-size:14px;border-bottom:1px dashed rgba(255,255,255,.06)}
+  .news-list li:last-child{border-bottom:none}
+  .news-list li::before{content:counter(n);position:absolute;left:0;top:8px;width:21px;height:21px;border-radius:7px;
+    font-size:11px;font-weight:700;display:grid;place-items:center;color:#cfe0ff;background:rgba(79,157,255,.14)}
+  .tip{margin-top:12px;padding:12px 14px;border-radius:11px;
+    background:linear-gradient(135deg,rgba(166,121,255,.12),rgba(79,157,255,.07));
+    border-left:3px solid var(--accent-2);font-size:13px;color:#d6cbff}
+
+  .bing{padding:0;position:relative;min-height:300px}
+  .bing .img{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.05);transition:transform 8s ease}
+  .bing:hover .img{transform:scale(1.12)}
+  .bing .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,.15) 55%,transparent)}
+  .bing .txt{position:absolute;left:0;right:0;bottom:0;padding:20px}
+  .bing .txt .tag{display:inline-block;font-size:11px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.16);margin-bottom:8px}
+  .bing .txt h3{font-size:18px;font-weight:700}
+  .bing .txt p{font-size:12.5px;color:#cfd3d8;margin-top:5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+  .quote{font-size:16px;line-height:1.85;font-weight:500;display:flex;align-items:flex-start;min-height:56px}
+  .quote .mark{font-size:40px;color:var(--accent-2);opacity:.35;font-family:Georgia,serif;margin-right:6px;line-height:.8;flex:none}
+  .quote.small{font-size:13.5px;font-weight:400;color:var(--text-dim);line-height:1.8}
+  .quote .en{display:block;color:var(--text-faint);font-size:13px;margin-top:6px;font-weight:400}
+  .luck{text-align:center;padding:6px 0}
+  .luck .rank{font-size:28px;font-weight:800;background:linear-gradient(120deg,var(--gold),#ff8f5e);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .luck .tip2{color:var(--text-dim);font-size:13px;margin-top:10px}
+
+  .hot-list,.plain-list,.hist-list,.film-list,.kv-list{list-style:none}
+  .hot-list li{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.06);font-size:13.5px}
+  .hot-list li:last-child{border-bottom:none}
+  .hot-list a{flex:1;transition:color .2s;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .hot-list a:hover{color:var(--accent)}
+  .hot-rank{flex:none;width:18px;text-align:center;font-weight:700;font-size:12px;color:var(--text-faint)}
+  .hot-list li:nth-child(1) .hot-rank{color:#ff6b6b}
+  .hot-list li:nth-child(2) .hot-rank{color:#ffa94d}
+  .hot-list li:nth-child(3) .hot-rank{color:#ffd43b}
+  .hot-val{flex:none;font-size:10.5px;color:var(--text-faint);background:rgba(255,255,255,.05);padding:2px 7px;border-radius:6px}
+
+  .hist-list li,.plain-list li{padding:9px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+  .hist-list li:last-child,.plain-list li:last-child{border-bottom:none}
+  .hist-year{font-weight:700;color:var(--accent);font-size:13px;margin-right:8px}
+  .hist-title{font-size:13.5px}
+  .plain-list a{font-size:13.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s}
+  .plain-list a:hover{color:var(--accent)}
+  .plain-list .meta{font-size:11px;color:var(--text-faint);margin-top:3px}
+
+  .price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .price-item{background:var(--card-2);border:1px solid var(--card-border);border-radius:11px;padding:11px 13px}
+  .price-item .k{font-size:11.5px;color:var(--text-dim)}
+  .price-item .v{font-size:17px;font-weight:700;margin-top:2px}
+  .price-item .n{color:var(--text-faint);font-size:10.5px;margin-top:3px}
+
+  .poster-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:14px}
+  .poster{display:block;width:100%;text-align:left;color:inherit;background:none;border:0;padding:0;cursor:pointer;font:inherit}
+  .poster .pic{aspect-ratio:2/3;border-radius:10px;background-size:cover;background-position:center;
+    background-color:rgba(255,255,255,.05);position:relative;overflow:hidden;transition:transform .25s}
+  .poster:hover .pic{transform:translateY(-4px)}
+  .poster .rating{position:absolute;top:6px;right:6px;font-size:11px;font-weight:700;color:#ffd43b;background:rgba(0,0,0,.6);padding:2px 7px;border-radius:6px}
+  .poster .free{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;color:#fff;background:var(--green);padding:2px 7px;border-radius:6px}
+  .poster .t{font-size:12.5px;margin-top:7px;font-weight:600;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .poster .s{font-size:11px;color:var(--text-faint);margin-top:1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+
+  .box-total{display:flex;gap:22px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px dashed rgba(255,255,255,.08);flex-wrap:wrap}
+  .box-total .b .n{font-size:11px;color:var(--text-dim)}
+  .box-total .b .v{font-size:18px;font-weight:700;margin-top:2px}
+  .film-list li{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+  .film-list li:last-child{border-bottom:none}
+  .film-list .nm{flex:1;font-size:13.5px;font-weight:600;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .film-list .rel{font-size:11px;color:var(--text-faint);font-weight:400}
+  .film-list .bx{text-align:right;flex:none}
+  .film-list .bx .a{font-size:14px;font-weight:700;color:var(--gold)}
+  .film-list .bx .p{font-size:11px;color:var(--text-faint)}
+
+  .tool-form{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .tool-form input,.tool-form select,.tool-form textarea{
+    background:var(--card-2);border:1px solid var(--card-border);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;flex:1;min-width:140px;outline:none}
+  .tool-form textarea{min-height:80px;resize:vertical;font-family:inherit}
+  .tool-form input:focus,.tool-form select:focus,.tool-form textarea:focus{border-color:var(--accent)}
+  .tool-form button{background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;color:#fff;
+    padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;flex:none}
+  .tool-form button:hover{opacity:.92}
+  .kv-list li{display:flex;gap:12px;padding:9px 0;border-bottom:1px dashed rgba(255,255,255,.06);font-size:13.5px;align-items:flex-start}
+  .kv-list li:last-child{border-bottom:none}
+  .kv-list .k{color:var(--text-dim);flex:none;width:110px}
+  .kv-list .v{flex:1;word-break:break-all;font-family:"SF Mono",Consolas,monospace;font-size:12.5px}
+  .copy{cursor:pointer;color:var(--accent);font-size:11px;flex:none}
+  .qr-result{text-align:center;padding:10px}
+  .qr-result img{max-width:220px;border-radius:12px;background:#fff;padding:10px}
+  .swatch-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px}
+  .swatch{border-radius:10px;overflow:hidden;border:1px solid var(--card-border)}
+  .swatch .c{height:60px}
+  .swatch .lbl2{font-size:11px;padding:6px 8px;background:var(--card-2)}
+  .swatch .lbl2 .nm2{color:var(--text-dim)}
+  .swatch .lbl2 .hx{font-family:monospace}
+  .strength-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:10px 0}
+  .strength-bar .f{height:100%;border-radius:999px;transition:width .5s}
+
+  .wx-hero{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+  .wx-temp{font-size:48px;font-weight:800;line-height:1}
+  .wx-meta{color:var(--text-dim);font-size:13px}
+  .wx-days{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+  .wx-day{background:var(--card-2);border:1px solid var(--card-border);border-radius:11px;padding:12px;text-align:center}
+  .wx-day .dt{font-size:12px;color:var(--text-dim)}
+  .wx-day .t{font-size:15px;font-weight:700;margin:6px 0}
+  .wx-day .c{font-size:12px;color:var(--text-faint)}
+  .lyric-box{white-space:pre-wrap;font-size:13.5px;line-height:1.9;color:var(--text-dim);max-height:420px;overflow:auto}
+
+  .skeleton{color:var(--text-faint);font-size:13px;display:flex;align-items:center;gap:8px;padding:6px 0}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease infinite}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+  .err{color:var(--warn);font-size:13px}
+  .empty{color:var(--text-faint);font-size:13px;padding:10px 0}
+  .note{font-size:12px;color:var(--text-faint);margin-top:8px}
+
+  /* 友好错误卡 */
+  .err-card{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:12px;
+    background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.28)}
+  .err-ico{font-size:22px;line-height:1;flex:none}
+  .err-body{flex:1;min-width:0}
+  .err-title{font-size:15px;font-weight:700;color:#ffb4b4;margin-bottom:4px}
+  .err-reason{font-size:13px;color:var(--text-dim);line-height:1.55}
+  .err-path{font-size:11.5px;color:var(--text-faint);margin-top:6px;font-family:"SF Mono",Consolas,monospace;word-break:break-all}
+  .err-toggle{margin-top:10px;background:transparent;border:1px solid rgba(255,107,107,.35);color:#ffb4b4;
+    border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}
+  .err-toggle:hover{background:rgba(255,107,107,.12)}
+  .err-detail{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.35);
+    color:var(--text-faint);font-size:11.5px;line-height:1.55;white-space:pre-wrap;word-break:break-all;
+    max-height:180px;overflow:auto;font-family:"SF Mono",Consolas,monospace}
+
+  /* RSS */
+  .rss-item{padding:14px 0;border-bottom:1px dashed rgba(255,255,255,.07)}
+  .rss-item:last-child{border-bottom:none}
+  .rss-item .rt{font-size:15px;font-weight:650;transition:color .2s}
+  .rss-item a:hover .rt{color:var(--accent)}
+  .rss-item .rm{font-size:12px;color:var(--text-faint);margin-top:4px}
+  .rss-item .rs{font-size:13px;color:var(--text-dim);margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}
+  .rss-manage{display:grid;gap:12px}
+  .rss-row{display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--card-2);
+    border:1px solid var(--card-border);border-radius:11px;flex-wrap:wrap}
+  .rss-row .nm{font-weight:650;flex:1;min-width:120px}
+  .rss-row .url{font-size:12px;color:var(--text-faint);font-family:monospace;word-break:break-all;flex:2;min-width:180px}
+  .rss-row .tag{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(79,157,255,.15);color:#9cc4ff}
+  .rss-row .tag.custom{background:rgba(166,121,255,.15);color:#d0b8ff}
+  .btn-ghost{background:var(--card);border:1px solid var(--card-border);color:var(--text);
+    padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer}
+  .btn-ghost:hover{border-color:rgba(255,255,255,.22)}
+  .btn-danger{border-color:rgba(255,107,107,.4);color:#ffb4b4}
+
+  .menu-toggle{display:none}
+  @media(max-width:860px){
+    .app{flex-direction:column}
+    .sidebar{width:100%;height:auto;position:sticky;top:0;z-index:20;border-right:none;border-bottom:1px solid var(--card-border)}
+    .side-brand{padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+    .side-brand .txt2{flex:1}
+    .side-date{display:none}
+    .nav{display:flex;overflow-x:auto;padding:6px 10px 10px;gap:6px}
+    .nav.collapsed{display:none}
+    .nav li{white-space:nowrap;margin-bottom:0;padding:8px 13px}
+    .side-foot{display:none}
+    .menu-toggle{display:inline-flex;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:9px;padding:7px 11px;cursor:pointer;font-size:18px}
+    .col-3,.col-4,.col-5,.col-6,.col-7,.col-8,.col-9{grid-column:span 12}
+    .main-inner{padding:20px 16px 60px}
+  }
+  @media(min-width:861px) and (max-width:1080px){.col-3,.col-4{grid-column:span 6}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="side-brand">
+      <div class="txt2"><h1>今日读世界</h1><p>60s 全量资讯平台</p></div>
+      <button class="menu-toggle" id="menuToggle">☰</button>
+    </div>
+    <div class="side-date"><div class="d" id="sideDate">--</div><div class="w" id="sideWeek">加载中…</div></div>
+    <ul class="nav" id="nav"></ul>
+    <div class="side-foot">
+      数据来源 <a href="https://github.com/vikiboss/60s" target="_blank" rel="noopener noreferrer">60s API</a><br>
+      文档 <a href="https://docs.60s-api.viki.moe" target="_blank" rel="noopener noreferrer">docs.60s-api</a>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="main-inner">
+      <div class="view-head">
+        <h2 id="viewTitle">今日概览</h2>
+        <button class="refresh" id="btnRefresh" title="刷新当前页">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          刷新
+        </button>
+      </div>
+      <div class="view-desc" id="viewDesc"></div>
+      <div id="subtabsWrap"></div>
+      <div id="viewBody"></div>
+    </div>
+  </main>
+</div>
+<script>
+const API = "https://60.newday.cc.cd/v2";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+/** 仅允许 http(s) 与相对路径，拦截 javascript:/data: 等 */
+function safeURL(u) {
+  if (u == null || u === "") return "";
+  const s = String(u).trim();
+  if (!s || s === "#") return "";
+  // 协议相对 //example.com
+  if (s.startsWith("//")) return "https:" + s;
+  // 相对路径
+  if (s.startsWith("/") && !s.startsWith("//")) return s;
+  try {
+    const parsed = new URL(s, location.href);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+  } catch {}
+  return "";
+}
+/** CSS url() 安全片段（用于 style 属性） */
+function cssUrl(u) {
+  const s = safeURL(u);
+  if (!s) return "none";
+  // 去掉会打断 CSS 的字符
+  const cleaned = s.replace(/['"\\)\s\n\r\f]/g, "");
+  if (!cleaned || !/^https?:\/\//i.test(cleaned) && !cleaned.startsWith("/")) return "none";
+  return `url("${cleaned}")`;
+}
+const A = (link, text, cls="") => {
+  const href = safeURL(link);
+  return href
+    ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer" class="${cls}">${esc(text)}</a>`
+    : `<span class="${cls}">${esc(text)}</span>`;
+};
+const SK = (t="加载中…") => `<div class="skeleton"><span class="dot"></span>${t}</div>`;
+/** 生成一次视图加载 token，防止快速切 tab 写回旧结果 */
+function makeLoadToken(owner) {
+  owner._loadToken = (owner._loadToken || 0) + 1;
+  return owner._loadToken;
+}
+function isLoadCurrent(owner, token) {
+  return owner._loadToken === token;
+}
+
+function makeApiError(message, path, extra={}) {
+  const e = new Error(message || "接口异常");
+  e.apiPath = path || "";
+  Object.assign(e, extra);
+  return e;
+}
+/** 把接口/网络原始错误整理成可读结构（剥离 HTML 源码） */
+function parseApiError(err, path) {
+  const raw = String(err?.message ?? err ?? "未知错误");
+  const apiPath = path || err?.apiPath || "";
+  const httpMatch = raw.match(/status:\s*(\d+)/i) || raw.match(/HTTP\s+(\d+)/i);
+  const httpStatus = err?.httpStatus || (httpMatch ? httpMatch[1] : null);
+  const apiCode = err?.apiCode;
+
+  // 去掉 message 中夹带的 HTML 错误页
+  let cleaned = raw
+    .replace(/response:\s*<[\s\S]*/i, "response: [上游返回 HTML 错误页，已省略]")
+    .replace(/<!doctype[\s\S]*/i, "[HTML 文档，已省略]")
+    .replace(/<html[\s\S]*/i, "[HTML 文档，已省略]")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  let friendly = "数据加载失败";
+  let reason = cleaned.slice(0, 160) || "未知原因";
+
+  if (/Failed to fetch|NetworkError|Load failed|网络/i.test(raw)) {
+    friendly = "网络请求失败";
+    reason = "无法连接到服务，可能是跨域（CORS）限制、断网或接口不可达。";
+  } else if (httpStatus) {
+    friendly = `上游服务异常（HTTP ${httpStatus}）`;
+    reason = "源站没有返回正常数据，而是错误页。该订阅源/接口当前可能不可用。";
+  } else if (apiCode && apiCode >= 500) {
+    friendly = `服务端错误（code ${apiCode}）`;
+    reason = cleaned.replace(/^服务器出错了[.…\s]*/i, "") || "接口内部出错，请稍后再试。";
+  } else if (apiCode && apiCode >= 400) {
+    friendly = `请求无效（code ${apiCode}）`;
+    reason = cleaned;
+  } else if (/数据异常|暂无/.test(raw)) {
+    friendly = "暂无可用数据";
+    reason = "接口响应成功，但内容为空或异常。";
+  } else if (/未找到|404|not found/i.test(raw)) {
+    friendly = "未找到内容";
+    reason = cleaned;
+  } else if (/参数/.test(raw)) {
+    friendly = "请求参数有误";
+    reason = cleaned;
+  } else if (/非 JSON|解析失败|Unexpected token/i.test(raw)) {
+    friendly = "响应格式异常";
+    reason = "期望 JSON，但收到了无法解析的内容（可能是 HTML 错误页）。";
+  } else if (/CORS/i.test(raw)) {
+    friendly = "跨域被拦截";
+    reason = "浏览器因 CORS 策略阻止了该请求。";
+  }
+
+  // 技术详情：截断 + 去掉 HTML
+  let detail = raw
+    .replace(/response:\s*<[\s\S]*/i, "response: [上游 HTML 错误页已省略]")
+    .replace(/<!doctype[\s\S]*/i, "[HTML 已省略]");
+  if (detail.length > 600) detail = detail.slice(0, 600) + "…";
+
+  return { friendly, reason, detail, path: apiPath, httpStatus, apiCode };
+}
+function fail(el, err, path) {
+  if (!el) return;
+  const info = (err && err.friendly) ? err : parseApiError(err, path);
+  const id = "err-" + Math.random().toString(36).slice(2, 9);
+  el.innerHTML = `<div class="err-card">
+    <div class="err-ico">⚠️</div>
+    <div class="err-body">
+      <div class="err-title">${esc(info.friendly)}</div>
+      <div class="err-reason">${esc(info.reason)}</div>
+      ${info.path ? `<div class="err-path">${esc(info.path)}</div>` : ""}
+      <button type="button" class="err-toggle" data-target="${id}">查看技术详情</button>
+      <pre class="err-detail" id="${id}" hidden>${esc(info.detail || "")}</pre>
+    </div>
+  </div>`;
+  el.querySelector(".err-toggle")?.addEventListener("click", (ev) => {
+    const btn = ev.currentTarget;
+    const t = document.getElementById(btn.dataset.target);
+    if (!t) return;
+    const open = t.hasAttribute("hidden");
+    if (open) { t.removeAttribute("hidden"); btn.textContent = "收起技术详情"; }
+    else { t.setAttribute("hidden", ""); btn.textContent = "查看技术详情"; }
+  });
+}
+async function getJSON(path, opts = {}) {
+  try {
+    const res = await fetch(API + path, { cache: "no-store", signal: opts.signal });
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; }
+    catch {
+      throw makeApiError(
+        res.ok ? "返回非 JSON" : `HTTP ${res.status}，返回非 JSON（可能是 HTML 错误页）`,
+        path,
+        { httpStatus: res.status, rawSnippet: text.slice(0, 200) }
+      );
+    }
+    if (!json) throw makeApiError("空响应", path, { httpStatus: res.status });
+    if (json.code && json.code !== 200) {
+      throw makeApiError(json.message || "接口异常", path, { apiCode: json.code, httpStatus: res.status });
+    }
+    if (json.message === "数据异常" && json.data == null) {
+      throw makeApiError("数据异常", path, { apiCode: json.code });
+    }
+    if (!res.ok && !json.data) throw makeApiError(`HTTP ${res.status}`, path, { httpStatus: res.status });
+    return json.data;
+  } catch (e) {
+    if (e?.name === "AbortError") throw e;
+    if (!e.apiPath) e.apiPath = path;
+    throw e;
+  }
+}
+function weekName(dateStr) {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  return "星期" + "日一二三四五六"[d.getDay()];
+}
+/* 根据访问 IP 推断天气城市
+ * 注意：60s 的 /ip 走 Cloudflare，经常返回美国空城市，不能单独依赖它。
+ * 天气接口参数是 query（不是 city），写错会永远回落到北京。
+ */
+let _localCityPromise = null;
+const CITY_EN_ZH = {
+  beijing:"北京", shanghai:"上海", tianjin:"天津", chongqing:"重庆",
+  wuhan:"武汉", guangzhou:"广州", shenzhen:"深圳", hangzhou:"杭州",
+  chengdu:"成都", nanjing:"南京", xian:"西安", "xi'an":"西安",
+  suzhou:"苏州", zhengzhou:"郑州", changsha:"长沙", shenyang:"沈阳",
+  qingdao:"青岛", dalian:"大连", ningbo:"宁波", xiamen:"厦门",
+  fuzhou:"福州", jinan:"济南", hefei:"合肥", kunming:"昆明",
+  nanning:"南宁", nanchang:"南昌", harbin:"哈尔滨", haerbin:"哈尔滨",
+  changchun:"长春", shijiazhuang:"石家庄", taiyuan:"太原",
+  huhehaote:"呼和浩特", hohhot:"呼和浩特", urumqi:"乌鲁木齐",
+  wulumuqi:"乌鲁木齐", lhasa:"拉萨", yinchuan:"银川", xining:"西宁",
+  haikou:"海口", sanya:"三亚", dongguan:"东莞", foshan:"佛山",
+  wuxi:"无锡", zhuhai:"珠海", zhongshan:"中山", huizhou:"惠州",
+  ezhou:"鄂州", xiangyang:"襄阳", yichang:"宜昌", jingzhou:"荆州",
+  huangshi:"黄石", xiaogan:"孝感", huanggang:"黄冈",
+  "ezhou shi":"鄂州", "wuhan shi":"武汉", "hubei sheng":"武汉"
+};
+function stripRegionSuffix(name) {
+  return String(name || "")
+    .replace(/(特别行政区|壮族自治区|回族自治区|维吾尔自治区|自治区|省|市|区|县|州|盟|地区|Sheng|Shi)$/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+function normalizeCityName(raw) {
+  if (!raw) return "";
+  let s = stripRegionSuffix(String(raw));
+  if (!s) return "";
+  // 英文城市名 → 中文（天气接口只认中文 query）
+  const key = s.toLowerCase();
+  if (CITY_EN_ZH[key]) return CITY_EN_ZH[key];
+  // 已是中文
+  if (/[一-鿿]/.test(s)) return s;
+  return "";
+}
+async function fetchJsonAny(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return res.json();
+}
+async function detectCityFromSources() {
+  // 1) ipwho.is：中文友好，CORS 开放（实测可定位到湖北鄂州/武汉一带）
+  try {
+    const d = await fetchJsonAny("https://ipwho.is/");
+    if (d && d.success !== false) {
+      const isCN = /CN|China|中国/i.test(String(d.country_code || d.country || ""));
+      if (isCN) {
+        const city = normalizeCityName(d.city) || normalizeCityName(d.region);
+        if (city) return { city, source: "ipwho.is", ip: d.ip || "" };
+      }
+    }
+  } catch {}
+
+  // 2) ipinfo.io：英文城市，再映射中文
+  try {
+    const d = await fetchJsonAny("https://ipinfo.io/json");
+    const isCN = /CN|China/i.test(String(d.country || ""));
+    if (isCN) {
+      const city = normalizeCityName(d.city) || normalizeCityName(d.region);
+      if (city) return { city, source: "ipinfo.io", ip: d.ip || "" };
+    }
+  } catch {}
+
+  // 3) 60s /ip：兜底（多数情况 city 为空，因为走 Cloudflare）
+  try {
+    const d = await getJSON("/ip");
+    const isCN = !d.country || /中国|China|CN/i.test(String(d.country));
+    if (isCN) {
+      const city = normalizeCityName(d.city) || normalizeCityName(d.district) || normalizeCityName(d.prov);
+      if (city) return { city, source: "60s/ip", ip: d.ip || "" };
+    }
+  } catch {}
+
+  return { city: "北京", source: "fallback", ip: "" };
+}
+async function getLocalCity() {
+  if (_localCityPromise) return _localCityPromise;
+  _localCityPromise = detectCityFromSources().then(r => r.city || "北京");
+  return _localCityPromise;
+}
+let _localCityDetailPromise = null;
+function detectCityFromSourcesCached() {
+  if (_localCityDetailPromise) return _localCityDetailPromise;
+  _localCityDetailPromise = detectCityFromSources();
+  // 同步城市缓存
+  _localCityPromise = _localCityDetailPromise.then(r => r.city || "北京");
+  return _localCityDetailPromise;
+}
+function resetLocalCityCache() {
+  _localCityPromise = null;
+  _localCityDetailPromise = null;
+}
+function weatherURL(kind, city) {
+  // 关键：参数名必须是 query
+  return `/weather/${kind}?query=${encodeURIComponent(city)}`;
+}
+function fmtHot(v) {
+  if (v == null || v === "") return "";
+  const n = Number(v);
+  if (isNaN(n)) return esc(v);
+  if (n >= 1e8) return (n / 1e8).toFixed(1) + "亿";
+  if (n >= 1e4) return (n / 1e4).toFixed(1) + "万";
+  return String(n);
+}
+function card(col, ico, title, sub, bodyId) {
+  return `<section class="card col-${col}">
+    <div class="card-head"><div class="ico">${ico}</div><h3>${esc(title)}</h3>
+    ${sub!=null?`<span class="sub" id="${bodyId}-sub">${esc(sub)}</span>`:""}</div>
+    <div id="${bodyId}">${SK()}</div></section>`;
+}
+async function fillCard(id, loader, render) {
+  const box = $(id); if (!box) return;
+  try { render(box, await loader()); } catch (e) { fail(box, e, e.apiPath); }
+}
+function renderHotList(list, limit=20) {
+  if (!list || !list.length) return `<div class="empty">暂无数据</div>`;
+  return `<ul class="hot-list">${list.slice(0,limit).map((it,i)=>{
+    const title=it.title||it.query||it.word||it.programme_name||it.movie_name||"";
+    const val=fmtHot(it.hot_value??it.hot??it.hotValue??it.score??it.score_desc??it.market_rate_desc??it.box_office_desc);
+    return `<li><span class="hot-rank">${i+1}</span>${A(it.link||it.url,title)}${val?`<span class="hot-val">${val}</span>`:""}</li>`;
+  }).join("")}</ul>`;
+}
+function renderNewsList(list, withMeta=false, limit=15) {
+  if (!list || !list.length) return `<div class="empty">暂无数据</div>`;
+  return `<ul class="plain-list">${list.slice(0,limit).map(it=>{
+    const meta=withMeta?`<div class="meta">${esc(it.source||"")}${it.score!=null?` · ${it.score} 分`:""}${it.author?` · ${esc(it.author)}`:""}</div>`:"";
+    return `<li>${A(it.link||it.url,it.title)}${meta}</li>`;
+  }).join("")}</ul>`;
+}
+function kv(rows) {
+  return `<ul class="kv-list">${rows.filter(Boolean).map(([k,v])=>{
+    // 兼容调用方已 esc 或未 esc：去标签后统一再转义，复制用纯文本
+    let plain = String(v ?? "");
+    // 若看起来已 HTML 转义，先解码再处理，避免 &amp;amp;
+    if (/&(?:amp|lt|gt|quot|#39);/.test(plain) && !/<[a-zA-Z!]/.test(plain)) {
+      plain = plain
+        .replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">")
+        .replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+    }
+    plain = plain.replace(/<[^>]+>/g, "");
+    return `<li><span class="k">${esc(k)}</span><span class="v">${esc(plain)}</span>
+     <span class="copy" data-copy="${esc(plain)}">复制</span></li>`;
+  }).join("")}</ul>`;
+}
+function bindCopy(root) {
+  root.querySelectorAll(".copy").forEach(el=>{
+    el.onclick=()=>{ navigator.clipboard?.writeText(el.dataset.copy||"").then(()=>{
+      const t=el.textContent; el.textContent="已复制"; setTimeout(()=>el.textContent=t,1200);
+    }).catch(()=>{}); };
+  });
+}
+function renderPosters(list, mapFn) {
+  if (!list || !list.length) return `<div class="empty">暂无数据</div>`;
+  return `<div class="poster-row">${list.map(mapFn).join("")}</div>`;
+}
+function makeSubtabs(tabs, active, onClick) {
+  $("subtabsWrap").innerHTML = `<div class="subtabs">${tabs.map(t=>
+    `<span class="subtab ${t.k===active?"active":""}" data-k="${t.k}">${t.n}</span>`
+  ).join("")}</div>`;
+  $("subtabsWrap").onclick = (e) => {
+    const el = e.target.closest(".subtab"); if (!el) return;
+    onClick(el.dataset.k);
+  };
+}
+
+/* ================= 视图 ================= */
+const VIEWS = {
+  home: {
+    title: "今日概览", desc: "核心资讯速览 · 其余分类见左侧导航",
+    render() {
+      $("subtabsWrap").innerHTML = "";
+      $("viewBody").innerHTML = `<div class="grid">
+        ${card(12,"📅","摸鱼日历 / 时间进度",null,"c-moyu")}
+        ${card(7,"📰","每日 60 秒读懂世界","","c-60s")}
+        <section class="card col-5 bing" id="c-bing-wrap">
+          <div class="img" id="bingImg"></div><div class="overlay"></div>
+          <div class="txt" id="c-bing"><span class="tag">Bing 每日一图</span><h3>加载中…</h3></div>
+        </section>
+        ${card(4,"💬","一言",null,"c-hito")}
+        ${card(4,"😄","段子",null,"c-duanzi")}
+        ${card(4,"🎲","运势",null,"c-luck")}
+        ${card(6,"🔥","微博热搜",null,"c-hot-home")}
+        ${card(6,"📜","历史上的今天",null,"c-hist")}
+        ${card(12,"🌤️","实时天气（定位中…）",null,"c-wx-home")}
+      </div>`;
+      fillCard("c-moyu", ()=>getJSON("/moyu"), (box,d)=>{
+        const dt=d.date||{}, lu=dt.lunar||{}, td=d.today||{}, pg=d.progress||{};
+        const chips=[];
+        if(dt.gregorian) chips.push(`<span class="chip">${esc(dt.gregorian)} ${esc(dt.weekday||"")}</span>`);
+        if(lu.monthCN) chips.push(`<span class="chip">农历${esc(lu.yearGanZhi||"")}年 ${esc(lu.monthCN)}${esc(lu.dayCN||"")}</span>`);
+        if(lu.zodiac) chips.push(`<span class="chip">属${esc(lu.zodiac)}</span>`);
+        if(td.solarTerm) chips.push(`<span class="chip hot">节气·${esc(td.solarTerm)}</span>`);
+        if(td.isWorkday) chips.push(`<span class="chip">工作日</span>`);
+        else if(td.isHoliday) chips.push(`<span class="chip hot">${esc(td.holidayName||"假期")}</span>`);
+        else if(td.isWeekend) chips.push(`<span class="chip hot">周末</span>`);
+        const bar=(name,p)=>p?`<div class="prog"><div class="lbl"><span>本${name}已过</span><b>${p.percentage}%</b></div>
+          <div class="track"><div class="fill" data-w="${p.percentage}"></div></div></div>`:"";
+        box.innerHTML=`<div class="moyu-info">${chips.join("")}</div>${bar("周",pg.week)}${bar("月",pg.month)}${bar("年",pg.year)}`;
+        requestAnimationFrame(()=>box.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%"));
+      });
+      fillCard("c-60s", ()=>getJSON("/60s"), (box,d)=>{
+        $("sideDate").textContent=d.date||""; $("sideWeek").textContent=weekName(d.date);
+        const sub=$("c-60s-sub"); if(sub) sub.textContent=(d.news?.length||0)+" 条";
+        let html=`<ol class="news-list">${(d.news||[]).map(n=>`<li>${esc(n)}</li>`).join("")}</ol>`;
+        if(d.tip) html+=`<div class="tip">💡 ${esc(d.tip)}</div>`;
+        html+=`<div class="note">RSS：<a href="${esc(API+"/60s/rss")}" target="_blank" rel="noopener noreferrer">${esc(API+"/60s/rss")}</a></div>`;
+        box.innerHTML=html;
+      });
+      (async()=>{
+        try{
+          const d=await getJSON("/bing");
+          const url=safeURL(d.cover||d.cover_4k||d.url);
+          if(url) $("bingImg").style.backgroundImage=cssUrl(url);
+          $("c-bing").innerHTML=`<span class="tag">Bing 每日一图</span><h3>${esc(d.title||d.headline||"今日壁纸")}</h3>
+            ${d.description?`<p>${esc(d.description)}</p>`:""}`;
+        }catch(e){ fail($("c-bing"), e, "/bing"); }
+      })();
+      fillCard("c-hito",()=>getJSON("/hitokoto"),(b,d)=>{b.innerHTML=`<div class="quote"><span class="mark">“</span><span>${esc(d.hitokoto)}</span></div>`;});
+      fillCard("c-duanzi",()=>getJSON("/duanzi"),(b,d)=>{b.innerHTML=`<div class="quote"><span class="mark">“</span><span>${esc(d.duanzi)}</span></div>`;});
+      fillCard("c-luck",()=>getJSON("/luck"),(b,d)=>{b.innerHTML=`<div class="luck"><div class="rank">${esc(d.luck_desc||"")}</div><div class="tip2">${esc(d.luck_tip||"")}</div></div>`;});
+      fillCard("c-hot-home",()=>getJSON("/weibo"),(b,d)=>b.innerHTML=renderHotList(d,12));
+      fillCard("c-hist",()=>getJSON("/today-in-history"),(b,d)=>{
+        const items=(d.items||d||[]).slice(0,8);
+        b.innerHTML=`<ul class="hist-list">${items.map(it=>
+          `<li><span class="hist-year">${esc(it.year)}</span><span class="hist-title">${esc(it.title)}</span></li>`).join("")}</ul>`;
+      });
+      fillCard("c-wx-home", async () => {
+        const info = await detectCityFromSourcesCached();
+        const city = info.city || "北京";
+        const sub = $("c-wx-home-sub");
+        if (sub) sub.textContent = (info.source === "fallback" ? "定位失败，默认 " : "IP 定位 · ") + city;
+        const head = document.querySelector("#c-wx-home")?.closest(".card")?.querySelector("h3");
+        if (head) head.textContent = "实时天气（" + city + "）";
+        return getJSON(weatherURL("realtime", city));
+      }, (b,d)=>{
+        const w=d.weather||{}, aq=d.air_quality||{}, loc=d.location||{};
+        b.innerHTML=`<div class="wx-hero">
+          ${safeURL(w.weather_icon)?`<img src="${esc(safeURL(w.weather_icon))}" width="64" height="64" alt="">`:""}
+          <div class="wx-temp">${esc(w.temperature)}°</div>
+          <div class="wx-meta">
+            <div style="font-size:16px;font-weight:700;color:var(--text)">${esc(loc.city||loc.name)} · ${esc(w.condition)}</div>
+            <div>湿度 ${esc(w.humidity)}% · ${esc(w.wind_direction)} ${esc(w.wind_power)}</div>
+            <div>空气 ${esc(aq.quality)} AQI ${esc(aq.aqi)} · 更新 ${esc(w.updated||"")}</div>
+          </div>
+        </div>`;
+      });
+    }
+  },
+
+  hot: {
+    title: "全网热榜", desc: "主流平台热搜全覆盖（异常源会单独提示）",
+    tabs: [
+      {k:"weibo",n:"微博",path:"/weibo"},
+      {k:"zhihu",n:"知乎",path:"/zhihu"},
+      {k:"toutiao",n:"头条",path:"/toutiao"},
+      {k:"douyin",n:"抖音",path:"/douyin"},
+      {k:"baidu",n:"百度热搜",path:"/baidu/hot"},
+      {k:"baidu-rt",n:"百度实时",path:"/baidu/realtime"},
+      {k:"tieba",n:"贴吧",path:"/baidu/tieba"},
+      {k:"rednote",n:"小红书",path:"/rednote"},
+      {k:"quark",n:"夸克",path:"/quark"},
+      {k:"bili",n:"B站",path:"/bili",unstable:true},
+      {k:"dongchedi",n:"懂车帝",path:"/dongchedi",unstable:true},
+      {k:"kuan",n:"酷安(beta)",path:"/beta/kuan",unstable:true},
+    ],
+    state:{tab:"weibo"},
+    render() {
+      makeSubtabs(this.tabs, this.state.tab, k=>{ this.state.tab=k; this.render(); });
+      $("viewBody").innerHTML=`<div class="grid">${card(12,"🔥","热搜榜",null,"c-hot")}</div>`;
+      this._load();
+    },
+    async _load() {
+      const token = makeLoadToken(this);
+      const tabKey = this.state.tab;
+      const t=this.tabs.find(x=>x.k===tabKey);
+      const box=$("c-hot"); if(!box||!t) return;
+      const sub=$("c-hot-sub"); if(sub) sub.textContent=t.n+(t.unstable?" · 可能不可用":"");
+      try {
+        const d=await getJSON(t.path);
+        if (!isLoadCurrent(this, token) || this.state.tab !== tabKey) return;
+        const list=Array.isArray(d)?d:(d?.list||d?.items||[]);
+        box.innerHTML=renderHotList(list,30);
+      } catch(e){
+        if (e?.name === "AbortError" || !isLoadCurrent(this, token) || this.state.tab !== tabKey) return;
+        fail(box,e);
+      }
+    }
+  },
+
+  news: {
+    title: "科技资讯", desc: "IT 之家 · AI 快讯 · Hacker News",
+    tabs: [
+      {k:"it",n:"IT 之家",path:"/it-news"},
+      {k:"it-rank",n:"IT 热榜",path:"/it-news/rank"},
+      {k:"ai",n:"AI 快讯",path:"/ai-news"},
+      {k:"hn-top",n:"HN Top",path:"/hacker-news/top"},
+      {k:"hn-new",n:"HN New",path:"/hacker-news/new"},
+      {k:"hn-best",n:"HN Best",path:"/hacker-news/best"},
+    ],
+    state:{tab:"it"},
+    render() {
+      makeSubtabs(this.tabs, this.state.tab, k=>{ this.state.tab=k; this.render(); });
+      $("viewBody").innerHTML=`<div class="grid">${card(12,"💻","资讯列表",null,"c-news")}</div>`;
+      this._load();
+    },
+    async _load() {
+      const token = makeLoadToken(this);
+      const tabKey = this.state.tab;
+      const t=this.tabs.find(x=>x.k===tabKey); const box=$("c-news");
+      if(!box||!t) return;
+      try {
+        const d=await getJSON(t.path);
+        if (!isLoadCurrent(this, token) || this.state.tab !== tabKey) return;
+        const list=Array.isArray(d)?d:(d.news||d.list||[]);
+        box.innerHTML=renderNewsList(list,true,25);
+      } catch(e){
+        if (e?.name === "AbortError" || !isLoadCurrent(this, token) || this.state.tab !== tabKey) return;
+        fail(box,e);
+      }
+    }
+  },
+
+  life: {
+    title: "每日一刻", desc: "一言 · 段子 · 运势 · 文案 · 答题 · 农历黄历",
+    tabs: [
+      {k:"daily",n:"每日文案"},
+      {k:"lunar",n:"农历黄历"},
+    ],
+    state:{tab:"daily"},
+    render() {
+      makeSubtabs(this.tabs, this.state.tab, k=>{ this.state.tab=k; this.render(); });
+      if (this.state.tab === "lunar") this._lunar();
+      else this._daily();
+    },
+    _daily() {
+      $("viewBody").innerHTML=`<div class="grid">
+        ${card(6,"💬","一言",null,"c-hito")}
+        ${card(6,"😄","每日段子",null,"c-duanzi")}
+        ${card(4,"🎲","今日运势",null,"c-luck")}
+        ${card(4,"💡","答案之书",null,"c-answer")}
+        ${card(4,"🐔","爸爸的冷笑话",null,"c-dadjoke")}
+        ${card(6,"🍗","疯狂星期四",null,"c-kfc")}
+        ${card(6,"🤒","发病文学",null,"c-fabing")}
+        ${card(6,"🧪","化学分子",null,"c-chem")}
+        ${card(6,"🎤","唱鸭",null,"c-changya")}
+        ${card(12,"🧩","JS 面试题",null,"c-js")}
+      </div>`;
+      fillCard("c-hito",()=>getJSON("/hitokoto"),(b,d)=>{b.innerHTML=`<div class="quote"><span class="mark">“</span><span>${esc(d.hitokoto)}</span></div>`;});
+      fillCard("c-duanzi",()=>getJSON("/duanzi"),(b,d)=>{b.innerHTML=`<div class="quote"><span class="mark">“</span><span>${esc(d.duanzi)}</span></div>`;});
+      fillCard("c-luck",()=>getJSON("/luck"),(b,d)=>{b.innerHTML=`<div class="luck"><div class="rank">${esc(d.luck_desc||"")}</div><div class="tip2">${esc(d.luck_tip||"")}</div></div>`;});
+      fillCard("c-answer",()=>getJSON("/answer"),(b,d)=>{b.innerHTML=`<div class="quote"><span class="mark">“</span><span>${esc(d.answer)}<span class="en">${esc(d.answer_en||"")}</span></span></div>`;});
+      fillCard("c-dadjoke",()=>getJSON("/dad-joke"),(b,d)=>{b.innerHTML=`<div class="quote small">${esc(d.content)}</div>`;});
+      fillCard("c-kfc",()=>getJSON("/kfc"),(b,d)=>{b.innerHTML=`<div class="quote small">${esc(d.kfc)}</div>`;});
+      fillCard("c-fabing",()=>getJSON("/fabing"),(b,d)=>{b.innerHTML=`<div class="quote small">${esc(d.saying)}</div>`;});
+      fillCard("c-chem",()=>getJSON("/chemical"),(b,d)=>{
+        b.innerHTML=`${safeURL(d.image)?`<div style="text-align:center;margin-bottom:10px"><img src="${esc(safeURL(d.image))}" style="max-width:160px;border-radius:10px;background:#fff;padding:8px" alt=""></div>`:""}
+          ${kv([["名称",d.name||"-"],["分子式",d.formula||"-"],["质量",d.mass||"-"],["ID",d.id||"-"]])}`;
+        bindCopy(b);
+      });
+      fillCard("c-changya",()=>getJSON("/changya"),(b,d)=>{
+        const song=d.song||{}, user=d.user||{}, audio=d.audio||{};
+        b.innerHTML=`${kv([["歌名",song.name||"-"],["原唱",song.singer||"-"],["用户",user.nickname||"-"]])}
+          ${song.lyrics?`<div class="tip" style="margin-top:10px">${(song.lyrics||[]).map(l=>esc(l)).join("<br>")}</div>`:""}
+          ${safeURL(audio.url)?`<audio controls style="width:100%;margin-top:12px" src="${esc(safeURL(audio.url))}"></audio>`:""}`;
+      });
+      fillCard("c-js",()=>getJSON("/awesome-js"),(b,d)=>{
+        b.innerHTML=`<div style="font-weight:600;margin-bottom:8px">${esc(d.question)}</div>
+          <pre style="background:rgba(0,0,0,.3);padding:12px;border-radius:10px;overflow:auto;font-size:12.5px;margin-bottom:10px">${esc(d.code)}</pre>
+          <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px">${(d.options||[]).map(o=>`<div>${esc(o)}</div>`).join("")}</div>
+          <div class="tip">答案：${esc(d.answer)} · ${esc(d.explanation||"")}</div>`;
+      });
+    },
+    _lunar() {
+      $("viewBody").innerHTML=`<div class="grid">${card(12,"🗓️","农历黄历 / 宜忌 / 运势",null,"c-lunar")}</div>`;
+      fillCard("c-lunar",()=>getJSON("/lunar"),(b,d)=>{
+        const s=d.solar||{}, l=d.lunar||{}, z=d.zodiac||{}, sc=d.sixty_cycle||{}, tb=d.taboo||{};
+        const dayTb=tb.day||{}, hourTb=tb.hour||{}, f=d.fortune||{}, st=d.stats||{};
+        b.innerHTML=`
+          <div class="moyu-info" style="margin-bottom:16px">
+            <span class="chip">${esc(s.full)} ${esc(s.week_desc)}</span>
+            <span class="chip">${esc(l.full_with_hour||l.desc_short)}</span>
+            <span class="chip hot">节气·${esc(d.term?.today||"-")}</span>
+            <span class="chip">生肖·${esc(z.year)}</span>
+            <span class="chip">${esc(d.constellation?.name||"")}</span>
+            <span class="chip">${esc(d.phase?.name||"")}</span>
+          </div>
+          ${kv([
+            ["干支",esc([sc.year?.name,sc.month?.name,sc.day?.name,sc.hour?.name].filter(Boolean).join(" / "))],
+            ["纳音",esc([d.nayin?.year,d.nayin?.month,d.nayin?.day,d.nayin?.hour].filter(Boolean).join(" / "))],
+            ["宜",esc(dayTb.recommends||"-")],
+            ["忌",esc(dayTb.avoids||"-")],
+            ["时辰宜",esc(hourTb.recommends||"-")],
+            ["时辰忌",esc(hourTb.avoids||"-")],
+            ["今日运势",esc(f.today_luck||"-")],
+            ["事业",esc(f.career||"-")],
+            ["财运",esc(f.money||"-")],
+            ["感情",esc(f.love||"-")],
+            ["年进度",esc(st.percents_formatted?.year||"-")],
+            ["百字",esc(d.baizi?.day_baizi||d.baizi?.year_baizi||"-")],
+          ])}`;
+        bindCopy(b);
+      });
+    }
+  },
+
+  media: {
+    title: "影音娱乐", desc: "豆瓣 · 猫眼 · Epic · 网易云 · 奥运",
+    tabs: [
+      {k:"db-movie",n:"豆瓣电影"},
+      {k:"db-tv-cn",n:"豆瓣华语剧"},
+      {k:"db-tv-gl",n:"豆瓣全球剧"},
+      {k:"db-show-cn",n:"豆瓣华语综艺"},
+      {k:"db-show-gl",n:"豆瓣全球综艺"},
+      {k:"my-movie",n:"猫眼电影票房"},
+      {k:"my-all",n:"猫眼总票房"},
+      {k:"my-tv",n:"猫眼电视收视"},
+      {k:"my-web",n:"猫眼网播"},
+      {k:"epic",n:"Epic 限免"},
+      {k:"ncm",n:"网易云榜单"},
+      {k:"teleplay",n:"百度电视剧"},
+      {k:"oly-events",n:"奥运赛事"},
+      {k:"oly-medal",n:"奥运奖牌榜"},
+    ],
+    state:{tab:"db-movie", ncmId:null},
+    render() {
+      makeSubtabs(this.tabs, this.state.tab, k=>{ this.state.tab=k; this.state.ncmId=null; this.render(); });
+      $("viewBody").innerHTML=`<div class="grid">${card(12,"🎬","内容",null,"c-media")}</div>`;
+      this._load();
+    },
+    async _load() {
+      const token = makeLoadToken(this);
+      const box=$("c-media"), k=this.state.tab;
+      if (!box) return;
+      try {
+        if (k.startsWith("db-")) {
+          const map={ "db-movie":"/douban/weekly/movie","db-tv-cn":"/douban/weekly/tv_chinese",
+            "db-tv-gl":"/douban/weekly/tv_global","db-show-cn":"/douban/weekly/show_chinese","db-show-gl":"/douban/weekly/show_global"};
+          const d=await getJSON(map[k]);
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          box.innerHTML=renderPosters(d.slice(0,18), m=>{
+            const href=safeURL(m.url);
+            const cover=cssUrl(m.cover_proxy||m.cover);
+            return `<a class="poster" href="${href?esc(href):"#"}" ${href?`target="_blank" rel="noopener noreferrer"`:`onclick="return false"`}>
+              <div class="pic" style="background-image:${cover}">
+                ${m.rating?`<span class="rating">★ ${esc(m.rating)}</span>`:""}
+              </div>
+              <div class="t">${esc(m.title)}</div>
+              <div class="s">${esc((m.card_subtitle||"").split("/")[0].trim())}</div>
+            </a>`;
+          });
+        } else if (k==="my-movie") {
+          const d=await getJSON("/maoyan/realtime/movie");
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          const total=`<div class="box-total">
+            <div class="b"><div class="n">今日总票房</div><div class="v">${esc(d.box_office)}${esc(d.box_office_unit||"")}</div></div>
+            <div class="b"><div class="n">总场次</div><div class="v">${esc(d.show_count_desc||"-")}</div></div>
+            <div class="b"><div class="n">总人次</div><div class="v">${esc(d.view_count_desc||"-")}</div></div>
+          </div>`;
+          const films=(d.list||[]).slice(0,20).map((m,i)=>
+            `<li><span class="hot-rank">${i+1}</span>
+              <span class="nm">${esc(m.movie_name)} <span class="rel">${esc(m.release_info||"")}</span></span>
+              <span class="bx"><div class="a">${esc(m.box_office)}${esc(m.box_office_unit||"")}</div>
+              <div class="p">占比 ${esc(m.box_office_rate||"-")}</div></span></li>`).join("");
+          box.innerHTML=total+`<ul class="film-list">${films}</ul>`;
+        } else if (k==="my-all") {
+          const d=await getJSON("/maoyan/all/movie");
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          const films=(d.list||[]).slice(0,30).map((m,i)=>
+            `<li><span class="hot-rank">${esc(m.rank||i+1)}</span>
+              <span class="nm">${esc(m.movie_name)} <span class="rel">${esc(m.release_year||"")}</span></span>
+              <span class="bx"><div class="a">${esc(m.box_office_desc||m.box_office)}</div></span></li>`).join("");
+          box.innerHTML=`<ul class="film-list">${films}</ul>`;
+        } else if (k==="my-tv") {
+          const d=await getJSON("/maoyan/realtime/tv");
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          const films=(d.list||[]).slice(0,30).map((m,i)=>
+            `<li><span class="hot-rank">${i+1}</span>
+              <span class="nm">${esc(m.programme_name)} <span class="rel">${esc(m.channel_name||"")}</span></span>
+              <span class="bx"><div class="a">${esc(m.market_rate_desc||m.market_rate)}</div>
+              <div class="p">关注 ${esc(m.attention_rate_desc||"-")}</div></span></li>`).join("");
+          box.innerHTML=`<ul class="film-list">${films||'<div class="empty">暂无数据</div>'}</ul>
+            <div class="note">更新：${esc(d.updated||"")}</div>`;
+        } else if (k==="my-web") {
+          const d=await getJSON("/maoyan/realtime/web");
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          const list=Array.isArray(d)?d:(d?.list||[]);
+          if (!list.length) throw new Error("数据异常或暂无网播数据");
+          box.innerHTML=renderHotList(list,30);
+        } else if (k==="epic") {
+          const d=await getJSON("/epic");
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          const free=d.filter(g=>g.is_free_now);
+          const list=(free.length?free:d).slice(0,18);
+          box.innerHTML=renderPosters(list,g=>{
+            const href=safeURL(g.link);
+            return `<a class="poster" href="${href?esc(href):"#"}" ${href?`target="_blank" rel="noopener noreferrer"`:`onclick="return false"`}>
+              <div class="pic" style="background-image:${cssUrl(g.cover)}">
+                ${g.is_free_now?`<span class="free">免费</span>`:""}
+              </div>
+              <div class="t">${esc(g.title)}</div>
+              <div class="s">${esc(g.original_price_desc||g.seller||"")}</div>
+            </a>`;
+          });
+        } else if (k==="ncm") {
+          if (this.state.ncmId) {
+            const ncmId = this.state.ncmId;
+            const songs=await getJSON("/ncm-rank/"+encodeURIComponent(ncmId));
+            if (!isLoadCurrent(this, token) || this.state.tab !== k || this.state.ncmId !== ncmId) return;
+            box.innerHTML=`<div style="margin-bottom:12px"><button type="button" class="subtab" id="ncm-back">← 返回榜单列表</button></div>
+              <ul class="film-list">${(songs||[]).slice(0,50).map((s,i)=>{
+                const artist=(s.artist||[]).map(a=>a.name).join(" / ");
+                return `<li><span class="hot-rank">${esc(s.rank||i+1)}</span>
+                  <span class="nm">${esc(s.title)} <span class="rel">${esc(artist)}</span></span>
+                  <span class="bx"><div class="a">${esc(s.duration_desc||"")}</div>
+                  <div class="p">热度 ${esc(s.popularity??s.score??"-")}</div></span></li>`;
+              }).join("")}</ul>`;
+            $("ncm-back").onclick=()=>{ this.state.ncmId=null; this._load(); };
+          } else {
+            const d=await getJSON("/ncm-rank/list");
+            if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+            box.innerHTML=renderPosters(d.slice(0,24), m=>`
+              <button type="button" class="poster" data-id="${esc(String(m.id||""))}">
+                <div class="pic" style="background-image:${cssUrl(m.cover)}"></div>
+                <div class="t">${esc(m.name)}</div>
+                <div class="s">${esc(m.update_frequency||"")}</div>
+              </button>`);
+            box.querySelectorAll(".poster[data-id]").forEach(el=>{
+              el.onclick=()=>{ this.state.ncmId=el.dataset.id; this._load(); };
+            });
+          }
+        } else if (k==="teleplay") {
+          const d=await getJSON("/baidu/teleplay");
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          box.innerHTML=renderHotList(d.map(x=>({title:x.title,hot_value:x.score_desc||x.score,link:x.url})),30);
+        } else if (k==="oly-events") {
+          const d=await getJSON("/olympics/events");
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          box.innerHTML=renderPosters(d.slice(0,24), e=>{
+            const href=safeURL(e.url);
+            return `<a class="poster" href="${href?esc(href):"#"}" ${href?`target="_blank" rel="noopener noreferrer"`:`onclick="return false"`}>
+              <div class="pic" style="background-image:${cssUrl(e.logo)};aspect-ratio:1;background-color:#fff;background-size:contain"></div>
+              <div class="t">${esc(e.name)}</div>
+              <div class="s">${esc(e.year)} · ${esc(e.season)}</div>
+            </a>`;
+          });
+        } else if (k==="oly-medal") {
+          const d=await getJSON("/olympics");
+          if (!isLoadCurrent(this, token) || this.state.tab !== k) return;
+          const list=Array.isArray(d)?d:(d?.list||d?.medals||[]);
+          box.innerHTML=renderHotList(list,30);
+        }
+      } catch(e){
+        if (e?.name === "AbortError" || !isLoadCurrent(this, token) || this.state.tab !== k) return;
+        fail(box,e);
+      }
+    }
+  },
+
+  finance: {
+    title: "财经生活", desc: "汇率 · 金价 · 油价",
+    render() {
+      $("subtabsWrap").innerHTML="";
+      $("viewBody").innerHTML=`<div class="grid">
+        ${card(12,"💱","人民币汇率","","c-rate")}
+        ${card(6,"🪙","今日金价",null,"c-gold")}
+        ${card(6,"⛽","今日油价","","c-fuel")}
+      </div>`;
+      fillCard("c-rate",()=>getJSON("/exchange-rate"),(b,d)=>{
+        const sub=$("c-rate-sub"); if(sub) sub.textContent=d.updated?("更新于 "+d.updated):"";
+        const want=["USD","EUR","JPY","GBP","HKD","AUD","KRW","SGD","CAD","CHF","TWD","THB","NZD","RUB","INR","MYR"];
+        const names={USD:"美元",EUR:"欧元",JPY:"日元",GBP:"英镑",HKD:"港元",AUD:"澳元",KRW:"韩元",SGD:"新元",CAD:"加元",CHF:"瑞郎",TWD:"新台币",THB:"泰铢",NZD:"新西兰元",RUB:"卢布",INR:"卢比",MYR:"林吉特"};
+        const rates=d.rates||[];
+        b.innerHTML=`<div class="price-grid">${want.map(cur=>{
+          const r=rates.find(x=>x.currency===cur); if(!r||!r.rate) return "";
+          const v=(100/r.rate).toFixed(2);
+          return `<div class="price-item"><div class="k">${cur} · ${names[cur]||cur}</div>
+            <div class="v">${v}</div><div class="n">100 ${cur} 兑人民币</div></div>`;
+        }).join("")}</div>`;
+      });
+      fillCard("c-gold",()=>getJSON("/gold-price"),(b,d)=>{
+        b.innerHTML=`<div class="price-grid">${(d.metals||[]).slice(0,12).map(m=>
+          `<div class="price-item"><div class="k">${esc(m.name)}</div>
+            <div class="v">${esc(m.today_price||m.sell_price)}</div>
+            <div class="n">${esc(m.unit||"元/克")} · 高${esc(m.high_price||"-")}/低${esc(m.low_price||"-")}</div></div>`).join("")}</div>`;
+      });
+      fillCard("c-fuel",()=>getJSON("/fuel-price"),(b,d)=>{
+        const sub=$("c-fuel-sub"); if(sub) sub.textContent=d.region||"";
+        let html=`<div class="price-grid">${(d.items||[]).map(it=>
+          `<div class="price-item"><div class="k">${esc(it.name)}</div>
+            <div class="v">${esc(it.price)}</div><div class="n">元/升</div></div>`).join("")}</div>`;
+        if(d.trend?.description) html+=`<div class="tip" style="margin-top:12px">📈 ${esc(d.trend.description)}</div>`;
+        b.innerHTML=html;
+      });
+    }
+  },
+
+  weather: {
+    title: "天气", desc: "默认按访问 IP 定位城市 · 可手动修改",
+    state:{city:""},
+    async render() {
+      $("subtabsWrap").innerHTML="";
+      $("viewBody").innerHTML=`<div class="grid">
+        <section class="card col-12">
+          <div class="card-head"><div class="ico">🌤️</div><h3>城市天气</h3><span class="sub" id="wx-loc-sub">正在根据 IP 定位…</span></div>
+          <div class="tool-form">
+            <input id="wx-city" value="" placeholder="城市名，如 北京 / 上海 / 深圳">
+            <button id="wx-btn">查询</button>
+            <button id="wx-relocate" type="button" style="background:var(--card);border:1px solid var(--card-border);color:var(--text)">按 IP 重定位</button>
+          </div>
+          <div id="wx-out">${SK("定位并查询中…")}</div>
+        </section>
+      </div>`;
+      const run=async(city)=>{
+        city=(city||$("wx-city").value.trim()||(await detectCityFromSourcesCached()).city||"北京");
+        this.state.city=city;
+        $("wx-city").value=city;
+        const out=$("wx-out"); out.innerHTML=SK();
+        try {
+          const [rt, fc] = await Promise.all([
+            getJSON(weatherURL("realtime", city)),
+            getJSON(weatherURL("forecast", city)),
+          ]);
+          const w=rt.weather||{}, aq=rt.air_quality||{}, loc=rt.location||{}, sr=rt.sunrise||{};
+          const days=fc.daily_forecast||[];
+          const hours=(fc.hourly_forecast||[]).slice(0,12);
+          const life=rt.life_indices||[];
+          out.innerHTML=`
+            <div class="wx-hero">
+              ${safeURL(w.weather_icon)?`<img src="${esc(safeURL(w.weather_icon))}" width="72" height="72" alt="">`:""}
+              <div class="wx-temp">${esc(w.temperature)}°</div>
+              <div class="wx-meta">
+                <div style="font-size:17px;font-weight:700;color:var(--text)">${esc(loc.city||loc.name)} · ${esc(w.condition)}</div>
+                <div>${esc(w.wind_direction)} ${esc(w.wind_power)} · 湿度 ${esc(w.humidity)}% · 气压 ${esc(w.pressure)}hPa</div>
+                <div>空气 ${esc(aq.quality)} AQI ${esc(aq.aqi)} · PM2.5 ${esc(aq.pm25)} · 日出 ${esc(sr.sunrise_desc)} / 日落 ${esc(sr.sunset_desc)}</div>
+                <div>更新 ${esc(w.updated||"")}</div>
+              </div>
+            </div>
+            <div style="font-weight:600;margin:8px 0 10px">未来预报</div>
+            <div class="wx-days">${days.slice(0,10).map(d=>`
+              <div class="wx-day">
+                <div class="dt">${esc((d.date||"").slice(5))}</div>
+                ${safeURL(d.day_weather_icon)?`<img src="${esc(safeURL(d.day_weather_icon))}" width="36" height="36" alt="">`:""}
+                <div class="t">${esc(d.min_temperature)}~${esc(d.max_temperature)}°</div>
+                <div class="c">${esc(d.day_condition)}/${esc(d.night_condition)}</div>
+                <div class="c">AQI ${esc(d.aqi||"-")}</div>
+              </div>`).join("")}</div>
+            ${hours.length?`<div style="font-weight:600;margin:18px 0 10px">逐时预报</div>
+              <div class="wx-days">${hours.map(h=>`
+                <div class="wx-day">
+                  <div class="dt">${esc((h.datetime||"").slice(11,16))}</div>
+                  <div class="t">${esc(h.temperature)}°</div>
+                  <div class="c">${esc(h.condition)}</div>
+                </div>`).join("")}</div>`:""}
+            ${life.length?`<div style="font-weight:600;margin:18px 0 10px">生活指数</div>
+              <div class="price-grid">${life.map(x=>`
+                <div class="price-item"><div class="k">${esc(x.name)}</div>
+                  <div class="v" style="font-size:14px">${esc(x.level)}</div>
+                  <div class="n">${esc(x.description||"")}</div></div>`).join("")}</div>`:""}
+          `;
+        } catch(e){ fail(out,e); }
+      };
+      $("wx-btn").onclick=()=>run();
+      $("wx-relocate").onclick=async()=>{
+        resetLocalCityCache();
+        const sub=$("wx-loc-sub"); if(sub) sub.textContent="正在根据 IP 定位…";
+        const info=await detectCityFromSourcesCached();
+        if(sub) sub.textContent=(info.source==="fallback"?"定位失败，默认 ":"IP 定位 · ")+info.city+(info.ip?`（${info.ip}）`:"");
+        run(info.city);
+      };
+      // 首次：IP 定位后查询
+      let city=this.state.city, srcHint="";
+      if (!city) {
+        const info=await detectCityFromSourcesCached();
+        city=info.city; srcHint=info.source==="fallback"?"定位失败，默认 ":"IP 定位 · ";
+        if (info.ip) srcHint += `${info.city}（${info.ip}）`;
+        else srcHint += info.city;
+      } else {
+        srcHint="当前城市 · "+city;
+      }
+      this.state.city=city;
+      $("wx-city").value=city;
+      const sub=$("wx-loc-sub"); if(sub) sub.textContent=srcHint;
+      run(city);
+    }
+  },
+
+  tools: {
+    title: "实用工具", desc: "翻译 · 哈希 · 二维码 · IP · Whois · 百科 · BMI · 密码 · 配色 · OG · 歌词 · QQ",
+    tabs: [
+      {k:"fanyi",n:"翻译"},
+      {k:"ip",n:"IP 查询"},
+      {k:"whois",n:"Whois"},
+      {k:"baike",n:"百科"},
+      {k:"hash",n:"Hash"},
+      {k:"qrcode",n:"二维码"},
+      {k:"password",n:"密码"},
+      {k:"health",n:"BMI"},
+      {k:"color",n:"配色"},
+      {k:"og",n:"OG 抓取"},
+      {k:"lyric",n:"歌词"},
+      {k:"qq",n:"QQ 资料"},
+    ],
+    state:{tab:"fanyi", langs:null},
+    render() {
+      makeSubtabs(this.tabs, this.state.tab, k=>{ this.state.tab=k; this.render(); });
+      $("viewBody").innerHTML=`<div class="grid"><section class="card col-12" id="c-tool"></section></div>`;
+      this._form();
+    },
+    async _form() {
+      const box=$("c-tool"), k=this.state.tab;
+      if (k==="fanyi") {
+        box.innerHTML=`<div class="card-head"><div class="ico">🌐</div><h3>多语言翻译</h3></div>
+          <div class="tool-form">
+            <select id="t-from" style="max-width:160px"><option value="auto">自动检测</option></select>
+            <select id="t-to" style="max-width:160px"></select>
+            <textarea id="t-in" placeholder="输入要翻译的文本">hello world</textarea>
+            <button id="t-btn">翻译</button>
+          </div>
+          <div id="t-out"></div>`;
+        try {
+          if (!this.state.langs) this.state.langs = await getJSON("/fanyi/langs");
+          const opts = this.state.langs.map(l=>`<option value="${esc(l.code)}">${esc(l.label)} (${esc(l.code)})</option>`).join("");
+          $("t-from").innerHTML = `<option value="auto">自动检测</option>` + opts;
+          $("t-to").innerHTML = opts;
+          // 默认 en -> zh-CHS
+          $("t-from").value = "en";
+          if ([...$("t-to").options].some(o=>o.value==="zh-CHS")) $("t-to").value="zh-CHS";
+        } catch(e) {
+          $("t-to").innerHTML = `<option value="zh-CHS">中文</option><option value="en">英语</option>`;
+        }
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const text=$("t-in").value; if(!text.trim()) throw new Error("请输入文本");
+            const from=$("t-from").value, to=$("t-to").value;
+            const d=await getJSON(`/fanyi?text=${encodeURIComponent(text)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+            out.innerHTML=`
+              <div class="tip" style="font-size:16px;color:var(--text)">${esc(d.target?.text||"")}</div>
+              ${kv([
+                ["原文语言",esc(d.source?.type_desc||d.source?.type)],
+                ["目标语言",esc(d.target?.type_desc||d.target?.type)],
+                ["读音",esc(d.target?.pronounce||"-")],
+              ])}`;
+            bindCopy(out);
+          }catch(e){fail(out,e);}
+        };
+      } else if (k==="ip") {
+        box.innerHTML=`<div class="card-head"><div class="ico">🌐</div><h3>IP 查询</h3></div>
+          <div class="tool-form"><input id="t-in" placeholder="留空查本机，或输入 IP"><button id="t-btn">查询</button></div>
+          <div id="t-out">${SK()}</div>`;
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const ip=$("t-in").value.trim();
+            const d=await getJSON(ip?`/ip?ip=${encodeURIComponent(ip)}`:"/ip");
+            out.innerHTML=kv([["IP",esc(d.ip)],["国家",esc(d.country)],["大洲",esc(d.continent)],
+              ["ISP",esc(d.isp)],["时区",esc(d.timezone)],["经纬度",`${d.lat||"-"}, ${d.lng||"-"}`],
+              ["AS",esc(d.asnumber)],["来源",esc(d.source)]]);
+            bindCopy(out);
+          }catch(e){fail(out,e);}
+        };
+        $("t-btn").click();
+      } else if (k==="whois") {
+        box.innerHTML=`<div class="card-head"><div class="ico">🔍</div><h3>Whois</h3></div>
+          <div class="tool-form"><input id="t-in" value="github.com" placeholder="域名"><button id="t-btn">查询</button></div>
+          <div id="t-out"></div>`;
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const domain=$("t-in").value.trim(); if(!domain) throw new Error("请输入域名");
+            const d=await getJSON(`/whois?domain=${encodeURIComponent(domain)}`);
+            out.innerHTML=kv([["域名",esc(d.domain)],["注册商",esc(d.registrar)],
+              ["创建",esc(d.created)],["到期",esc(d.expires||d.expiry||"-")],
+              ["DNSSEC",String(d.dnssec)],["Nameservers",esc((d.nameservers||[]).join(", "))],
+              ["状态",esc((d.status||[]).join(" / "))]]);
+            bindCopy(out);
+          }catch(e){fail(out,e);}
+        };
+      } else if (k==="baike") {
+        box.innerHTML=`<div class="card-head"><div class="ico">📚</div><h3>百科</h3></div>
+          <div class="tool-form"><input id="t-in" value="中国" placeholder="关键词"><button id="t-btn">查询</button></div>
+          <div id="t-out"></div>`;
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const word=$("t-in").value.trim(); if(!word) throw new Error("请输入关键词");
+            const d=await getJSON(`/baike?word=${encodeURIComponent(word)}`);
+            out.innerHTML=`<div style="font-size:18px;font-weight:700;margin-bottom:6px">${esc(d.title)}</div>
+              <div style="color:var(--text-dim);margin-bottom:10px">${esc(d.description||"")}</div>
+              <div class="quote small">${esc(d.abstract||"")}</div>`;
+          }catch(e){fail(out,e);}
+        };
+      } else if (k==="hash") {
+        box.innerHTML=`<div class="card-head"><div class="ico">#️⃣</div><h3>Hash / Base64</h3></div>
+          <div class="tool-form"><input id="t-in" value="hello" placeholder="文本"><button id="t-btn">计算</button></div>
+          <div id="t-out"></div>`;
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const content=$("t-in").value; if(!content) throw new Error("请输入文本");
+            const d=await getJSON(`/hash?content=${encodeURIComponent(content)}`);
+            out.innerHTML=kv([["MD5",esc(d.md5)],["SHA1",esc(d.sha?.sha1)],["SHA256",esc(d.sha?.sha256)],
+              ["SHA512",esc(d.sha?.sha512)],["Base64",esc(d.base64?.encoded)],["URL Encode",esc(d.url?.encoded)]]);
+            bindCopy(out);
+          }catch(e){fail(out,e);}
+        };
+      } else if (k==="qrcode") {
+        box.innerHTML=`<div class="card-head"><div class="ico">▦</div><h3>二维码</h3></div>
+          <div class="tool-form"><input id="t-in" value="https://github.com/vikiboss/60s"><button id="t-btn">生成</button></div>
+          <div id="t-out"></div>`;
+        $("t-btn").onclick=()=>{
+          const text=$("t-in").value.trim(); if(!text) return;
+          const qrSrc = `${API}/qrcode?text=${encodeURIComponent(text)}`;
+          $("t-out").innerHTML=`<div class="qr-result"><img src="${esc(qrSrc)}" alt="QR">
+            <div style="margin-top:10px;color:var(--text-faint);font-size:12px">${esc(text)}</div></div>`;
+        };
+        $("t-btn").click();
+      } else if (k==="password") {
+        box.innerHTML=`<div class="card-head"><div class="ico">🔑</div><h3>密码生成 / 强度</h3></div>
+          <div class="tool-form">
+            <button id="t-gen">生成强密码</button>
+            <input id="t-in" placeholder="或输入密码检测">
+            <button id="t-btn">检测强度</button>
+          </div>
+          <div id="t-out"></div>`;
+        $("t-gen").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const d=await getJSON("/password");
+            out.innerHTML=`<div style="font-size:22px;font-weight:700;font-family:monospace;margin-bottom:10px">${esc(d.password)}
+              <span class="copy" data-copy="${esc(d.password)}">复制</span></div>
+              ${kv([["长度",String(d.length)],["强度",esc(d.generation_info?.strength)],
+                ["熵值",String(d.generation_info?.entropy)],["破解时间",esc(d.generation_info?.time_to_crack)]])}`;
+            bindCopy(out);
+          }catch(e){fail(out,e);}
+        };
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const pw=$("t-in").value; if(!pw) throw new Error("请输入密码");
+            const d=await getJSON(`/password/check?password=${encodeURIComponent(pw)}`);
+            const score=Math.min(100,Math.max(5,(d.score||0)*20+10));
+            const color=score<30?"#ff6b6b":score<60?"#ffa94d":score<80?"#ffd43b":"#4ade80";
+            out.innerHTML=`<div>强度：<b style="color:${color}">${esc(d.strength)}</b></div>
+              <div class="strength-bar"><div class="f" style="width:${score}%;background:${color}"></div></div>
+              ${kv([["长度",String(d.length)],["熵值",String(d.entropy)],["破解时间",esc(d.time_to_crack)]])}
+              ${(d.recommendations||[]).length?`<div class="tip" style="margin-top:10px">${d.recommendations.map(r=>esc(r)).join("<br>")}</div>`:""}`;
+          }catch(e){fail(out,e);}
+        };
+        $("t-gen").click();
+      } else if (k==="health") {
+        box.innerHTML=`<div class="card-head"><div class="ico">💪</div><h3>BMI 健康评估</h3></div>
+          <div class="tool-form">
+            <input id="t-h" type="number" value="170" placeholder="身高 cm">
+            <input id="t-w" type="number" value="60" placeholder="体重 kg">
+            <select id="t-g"><option value="male">男</option><option value="female">女</option></select>
+            <input id="t-a" type="number" value="25" placeholder="年龄">
+            <button id="t-btn">计算</button>
+          </div>
+          <div id="t-out"></div>`;
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const h=$("t-h").value,w=$("t-w").value,g=$("t-g").value,a=$("t-a").value;
+            const d=await getJSON(`/health?height=${h}&weight=${w}&gender=${g}&age=${a}`);
+            const bmi=d.bmi||{}, wa=d.weight_assessment||{};
+            out.innerHTML=`<div style="font-size:28px;font-weight:800;margin-bottom:6px">${esc(bmi.value)}
+              <span style="font-size:14px;color:var(--accent)">${esc(bmi.category)}</span></div>
+              <div style="color:var(--text-dim);margin-bottom:12px">${esc(bmi.evaluation)} · ${esc(bmi.risk)}</div>
+              ${kv([["理想体重",esc(wa.ideal_weight_range||"-")],["BMI 分类",esc(bmi.category_desc||bmi.category)]])}`;
+          }catch(e){fail(out,e);}
+        };
+      } else if (k==="color") {
+        box.innerHTML=`<div class="card-head"><div class="ico">🎨</div><h3>随机配色</h3></div>
+          <div class="tool-form">
+            <button id="t-rand">随机颜色</button>
+            <input id="t-in" placeholder="主色 hex #752687">
+            <button id="t-btn">生成配色板</button>
+          </div>
+          <div id="t-out"></div>`;
+        $("t-rand").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const d=await getJSON("/color/random");
+            out.innerHTML=`<div class="swatch-row"><div class="swatch"><div class="c" style="background:${esc(d.hex)};height:100px"></div>
+              <div class="lbl2"><div class="nm2">${esc(d.name)}</div><div class="hx">${esc(d.hex)}</div></div></div></div>
+              ${kv([["HEX",esc(d.hex)],["RGB",esc(d.rgb?.string)],["HSL",esc(d.hsl?.string)],
+                ["CMYK",esc(d.cmyk?.string)],["最佳文字色",esc(d.accessibility?.best_text_color||"-")]])}`;
+            bindCopy(out);
+          }catch(e){fail(out,e);}
+        };
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const hex=($("t-in").value.trim()||"#752687").replace("#","");
+            const d=await getJSON(`/color/palette?hex=${encodeURIComponent(hex)}`);
+            out.innerHTML=(d.palettes||[]).map(p=>`
+              <div style="margin-bottom:16px">
+                <div style="font-weight:600;margin-bottom:8px">${esc(p.name)}
+                  <span style="color:var(--text-faint);font-size:12px;font-weight:400"> · ${esc(p.description||"")}</span>
+                </div>
+                <div class="swatch-row">${(p.colors||[]).map(c=>
+                  `<div class="swatch"><div class="c" style="background:${esc(c.hex)}"></div>
+                    <div class="lbl2"><div class="nm2">${esc(c.name||c.role)}</div>
+                    <div class="hx">${esc(c.hex)}</div></div></div>`).join("")}
+                </div>
+              </div>`).join("");
+          }catch(e){fail(out,e);}
+        };
+        $("t-rand").click();
+      } else if (k==="og") {
+        box.innerHTML=`<div class="card-head"><div class="ico">🔗</div><h3>OG 信息抓取</h3></div>
+          <div class="tool-form"><input id="t-in" value="https://github.com"><button id="t-btn">抓取</button></div>
+          <div id="t-out"></div>`;
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const url=$("t-in").value.trim(); if(!url) throw new Error("请输入 URL");
+            const d=await getJSON(`/og?url=${encodeURIComponent(url)}`);
+            out.innerHTML=`${safeURL(d.image)?`<img src="${esc(safeURL(d.image))}" style="max-width:100%;border-radius:12px;margin-bottom:12px;max-height:220px;object-fit:cover" alt="">`:""}
+              <div style="font-size:16px;font-weight:700;margin-bottom:6px">${esc(d.title||"-")}</div>
+              <div class="quote small">${esc(d.description||"")}</div>`;
+          }catch(e){fail(out,e);}
+        };
+      } else if (k==="lyric") {
+        box.innerHTML=`<div class="card-head"><div class="ico">🎵</div><h3>歌词查询</h3></div>
+          <div class="tool-form"><input id="t-in" value="晴天 周杰伦" placeholder="歌名 / 歌手"><button id="t-btn">查询</button></div>
+          <div id="t-out"></div>
+          <div class="note">接口参数为 query；部分曲目源站可能 404</div>`;
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const q=$("t-in").value.trim(); if(!q) throw new Error("请输入关键词");
+            const d=await getJSON(`/lyric?query=${encodeURIComponent(q)}`);
+            if (!d) throw new Error("未找到歌曲或歌词");
+            const lyric = d.lyric || d.lrc || d.content || d.lyrics || "";
+            const title = d.title || d.name || d.song || q;
+            const artist = d.artist || d.singer || d.author || "";
+            out.innerHTML=`<div style="font-weight:700;font-size:16px;margin-bottom:6px">${esc(title)}
+              <span style="color:var(--text-faint);font-weight:400;font-size:13px"> · ${esc(artist)}</span></div>
+              ${typeof lyric==="string" && lyric
+                ? `<div class="lyric-box">${esc(lyric)}</div>`
+                : kv(Object.entries(d).slice(0,20).map(([kk,vv])=>[kk, esc(typeof vv==="object"?JSON.stringify(vv):vv)]))}`;
+            bindCopy(out);
+          }catch(e){fail(out,e);}
+        };
+      } else if (k==="qq") {
+        box.innerHTML=`<div class="card-head"><div class="ico">🐧</div><h3>QQ 资料（beta）</h3></div>
+          <div class="tool-form"><input id="t-in" value="10001" placeholder="QQ 号"><button id="t-btn">查询</button></div>
+          <div id="t-out"></div>`;
+        $("t-btn").onclick=async()=>{
+          const out=$("t-out"); out.innerHTML=SK();
+          try{
+            const qq=$("t-in").value.trim(); if(!qq) throw new Error("请输入 QQ 号");
+            const d=await getJSON(`/beta/qq/profile?qq=${encodeURIComponent(qq)}`);
+            out.innerHTML=`${safeURL(d.avatar_url)?`<div style="text-align:center;margin-bottom:12px">
+              <img src="${esc(safeURL(d.avatar_url))}" style="width:96px;height:96px;border-radius:50%;border:2px solid var(--card-border)" alt=""></div>`:""}
+              ${kv([["QQ",d.qq],["昵称",d.nickname||"-"]])}`;
+            bindCopy(out);
+          }catch(e){fail(out,e);}
+        };
+      }
+    }
+  },
+
+  /* ---------- RSS 订阅（可扩展） ---------- */
+  rss: {
+    title: "RSS 订阅",
+    desc: "支持 Atom / RSS 2.0 · 内置源可直接阅读 · 自定义源可添加（需目标站点开启 CORS）",
+    /* 内置订阅源：后续扩展只需往这里 push 一项即可 */
+    builtins: [
+      {
+        id: "githubweekly",
+        name: "GitHub 一周热点",
+        url: "https://itcoffee66.github.io/githubweekly/feed.xml",
+        home: "https://itcoffee66.github.io/githubweekly/",
+        desc: "IT咖啡馆 · 每周 GitHub 热门开源",
+      },
+      {
+        id: "60s-rss",
+        name: "60s 每日新闻",
+        url: "https://60.newday.cc.cd/v2/60s/rss",
+        home: "https://github.com/vikiboss/60s",
+        desc: "60s 每日资讯 RSS",
+      },
+    ],
+    state: { tab: "githubweekly", custom: null },
+    _loadCustom() {
+      try {
+        const raw = JSON.parse(localStorage.getItem("rss-custom-feeds") || "[]");
+        if (!Array.isArray(raw)) return [];
+        // 过滤非法条目，仅保留 https/http
+        return raw.filter(f => f && f.id && f.name && safeURL(f.url)).map(f => ({
+          id: String(f.id).slice(0, 40),
+          name: String(f.name).slice(0, 80),
+          url: safeURL(f.url),
+          home: safeURL(f.home) || "",
+          desc: String(f.desc || "").slice(0, 160),
+        }));
+      } catch { return []; }
+    },
+    _saveCustom(list) {
+      try {
+        localStorage.setItem("rss-custom-feeds", JSON.stringify(list));
+      } catch (e) {
+        throw makeApiError("无法保存到本机（可能超出存储配额）", "localStorage");
+      }
+    },
+    _allFeeds() {
+      const custom = this._loadCustom().map(f => ({ ...f, custom: true }));
+      return [...this.builtins, ...custom];
+    },
+    render() {
+      this.state.custom = this._loadCustom();
+      const feeds = this._allFeeds();
+      // 若当前 tab 不存在，回退第一个
+      if (!feeds.find(f => f.id === this.state.tab)) {
+        this.state.tab = feeds[0]?.id || "manage";
+      }
+      const tabs = [
+        ...feeds.map(f => ({ k: f.id, n: f.name })),
+        { k: "manage", n: "⚙ 管理源" },
+      ];
+      makeSubtabs(tabs, this.state.tab, k => { this.state.tab = k; this.render(); });
+      if (this.state.tab === "manage") {
+        this._renderManage();
+      } else {
+        const feed = feeds.find(f => f.id === this.state.tab);
+        $("viewBody").innerHTML = `<div class="grid">${card(12,"📰", feed?.name || "RSS", feed?.desc || "", "c-rss")}</div>`;
+        this._loadFeed(feed);
+      }
+    },
+    _renderManage() {
+      const custom = this._loadCustom();
+      $("viewBody").innerHTML = `<div class="grid">
+        <section class="card col-12">
+          <div class="card-head"><div class="ico">➕</div><h3>添加 RSS / Atom 源</h3></div>
+          <div class="tool-form">
+            <input id="rss-name" placeholder="名称（可选，留空自动读取）" style="max-width:200px">
+            <input id="rss-url" placeholder="Feed 地址，如 https://example.com/feed.xml">
+            <button id="rss-add">添加</button>
+          </div>
+          <div class="note">说明：浏览器直接请求需目标站点设置 CORS；GitHub Pages 等多数静态源可用。添加后保存在本机 localStorage。</div>
+          <div id="rss-add-msg" style="margin-top:10px"></div>
+        </section>
+        <section class="card col-12">
+          <div class="card-head"><div class="ico">📋</div><h3>已配置的源</h3></div>
+          <div class="rss-manage" id="rss-list"></div>
+        </section>
+      </div>`;
+      this._paintList();
+      $("rss-add").onclick = () => this._addFeed();
+    },
+    _paintList() {
+      const box = $("rss-list"); if (!box) return;
+      const rows = this._allFeeds().map(f => `
+        <div class="rss-row" data-id="${esc(f.id)}">
+          <span class="tag ${f.custom?"custom":""}">${f.custom?"自定义":"内置"}</span>
+          <span class="nm">${esc(f.name)}</span>
+          <span class="url">${esc(f.url)}</span>
+          <button class="btn-ghost rss-open" data-id="${esc(f.id)}">打开</button>
+          ${f.custom?`<button class="btn-ghost btn-danger rss-del" data-id="${esc(f.id)}">删除</button>`:""}
+        </div>`).join("");
+      box.innerHTML = rows || `<div class="empty">暂无订阅源</div>`;
+      box.querySelectorAll(".rss-open").forEach(btn => {
+        btn.onclick = () => { this.state.tab = btn.dataset.id; this.render(); };
+      });
+      box.querySelectorAll(".rss-del").forEach(btn => {
+        btn.onclick = () => {
+          const list = this._loadCustom().filter(x => x.id !== btn.dataset.id);
+          this._saveCustom(list);
+          this._paintList();
+        };
+      });
+    },
+    async _addFeed() {
+      const msg = $("rss-add-msg");
+      const rawUrl = ($("rss-url").value || "").trim();
+      let name = ($("rss-name").value || "").trim();
+      if (!rawUrl) { msg.innerHTML = `<div class="err">请填写 Feed 地址</div>`; return; }
+      const url = safeURL(rawUrl);
+      if (!url) { msg.innerHTML = `<div class="err">仅支持 http/https 协议的 Feed 地址</div>`; return; }
+      msg.innerHTML = SK("正在校验 Feed…");
+      try {
+        const feed = await fetchAndParseRSS(url);
+        if (!name) name = feed.title || "未命名源";
+        const id = "c_" + Math.random().toString(36).slice(2, 9);
+        const list = this._loadCustom();
+        if (list.some(x => x.url === url) || this.builtins.some(x => x.url === url)) {
+          throw makeApiError("该 Feed 已存在", url);
+        }
+        if (list.length >= 30) throw makeApiError("自定义源最多 30 个，请先删除部分", url);
+        list.push({
+          id,
+          name: String(name).slice(0, 80),
+          url,
+          home: safeURL(feed.link) || "",
+          desc: String(feed.subtitle || "").slice(0, 160),
+        });
+        this._saveCustom(list);
+        msg.innerHTML = `<div class="tip">已添加「${esc(name)}」，共解析 ${feed.items.length} 条</div>`;
+        $("rss-url").value = ""; $("rss-name").value = "";
+        this._paintList();
+      } catch (e) {
+        fail(msg, e, url);
+      }
+    },
+    async _loadFeed(feed) {
+      const token = makeLoadToken(this);
+      const box = $("c-rss"); if (!box || !feed) return;
+      const feedId = feed.id;
+      box.innerHTML = SK("拉取 Feed…");
+      try {
+        const data = await fetchAndParseRSS(feed.url);
+        if (!isLoadCurrent(this, token) || this.state.tab !== feedId) return;
+        const sub = $("c-rss-sub");
+        if (sub) sub.textContent = `${data.items.length} 条 · ${data.updated || ""}`;
+        if (!data.items.length) {
+          box.innerHTML = `<div class="empty">Feed 中暂无条目</div>`;
+          return;
+        }
+        const home = safeURL(feed.home);
+        box.innerHTML = data.items.slice(0, 40).map(it => {
+          const href = safeURL(it.link);
+          return `<div class="rss-item">
+            ${href
+              ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer"><div class="rt">${esc(it.title||"（无标题）")}</div></a>`
+              : `<div class="rt">${esc(it.title||"（无标题）")}</div>`}
+            <div class="rm">${esc(it.date||"")}${it.author?` · ${esc(it.author)}`:""}${feed.name?` · ${esc(feed.name)}`:""}</div>
+            ${it.summary?`<div class="rs">${esc(it.summary)}</div>`:""}
+          </div>`;
+        }).join("") +
+          (home ? `<div class="note" style="margin-top:14px">来源站点：<a href="${esc(home)}" target="_blank" rel="noopener noreferrer">${esc(home)}</a></div>` : "");
+      } catch (e) {
+        if (e?.name === "AbortError" || !isLoadCurrent(this, token) || this.state.tab !== feedId) return;
+        fail(box, e, feed.url);
+      }
+    }
+  }
+};
+
+/* ================= RSS 解析（Atom / RSS 2.0） ================= */
+function textOf(el) {
+  if (!el) return "";
+  return (el.textContent || "").trim();
+}
+function attrOf(el, name) {
+  return el?.getAttribute?.(name) || "";
+}
+function first(el, sel) {
+  return el?.querySelector?.(sel) || null;
+}
+function stripHtmlLite(html) {
+  return String(html || "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ").trim();
+}
+function fmtRssDate(s) {
+  if (!s) return "";
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return s;
+  const p = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function parseRSSXML(xmlText, sourceUrl) {
+  const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+  const parseErr = doc.querySelector("parsererror");
+  if (parseErr) throw makeApiError("Feed XML 解析失败", sourceUrl);
+
+  // Atom
+  const feedEl = doc.querySelector("feed");
+  if (feedEl) {
+    const title = textOf(first(feedEl, "title"));
+    const subtitle = textOf(first(feedEl, "subtitle"));
+    const updated = fmtRssDate(textOf(first(feedEl, "updated")));
+    let link = "";
+    feedEl.querySelectorAll("link").forEach(l => {
+      const rel = attrOf(l, "rel") || "alternate";
+      if (rel === "alternate" && !link) link = attrOf(l, "href");
+      if (!link && attrOf(l, "href")) link = attrOf(l, "href");
+    });
+    const items = [...feedEl.querySelectorAll("entry")].map(en => {
+      let itemLink = "";
+      en.querySelectorAll("link").forEach(l => {
+        const rel = attrOf(l, "rel") || "alternate";
+        if (rel === "alternate" && !itemLink) itemLink = attrOf(l, "href");
+        if (!itemLink) itemLink = attrOf(l, "href");
+      });
+      const summary = textOf(first(en, "summary")) || stripHtmlLite(textOf(first(en, "content")));
+      return {
+        title: textOf(first(en, "title")),
+        link: itemLink,
+        date: fmtRssDate(textOf(first(en, "published")) || textOf(first(en, "updated"))),
+        author: textOf(first(en, "author name")) || textOf(first(en, "author")),
+        summary,
+      };
+    });
+    return { title, subtitle, link, updated, items, type: "atom" };
+  }
+
+  // RSS 2.0
+  const channel = doc.querySelector("channel");
+  if (channel) {
+    const title = textOf(first(channel, "title"));
+    const subtitle = textOf(first(channel, "description"));
+    const link = textOf(first(channel, "link"));
+    const updated = fmtRssDate(textOf(first(channel, "lastBuildDate")) || textOf(first(channel, "pubDate")));
+    const items = [...channel.querySelectorAll("item")].map(it => {
+      const linkText = textOf(first(it, "link"));
+      const guidEl = first(it, "guid");
+      const guidText = textOf(guidEl);
+      const link = linkText || (attrOf(guidEl, "isPermaLink") !== "false" ? guidText : "");
+      return {
+        title: textOf(first(it, "title")),
+        link,
+        date: fmtRssDate(textOf(first(it, "pubDate"))),
+        author: textOf(first(it, "author")) || textOf(it.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", "creator")[0]) || textOf(it.getElementsByTagName("creator")[0]),
+        summary: stripHtmlLite(textOf(first(it, "description")) || textOf(it.getElementsByTagNameNS("http://purl.org/rss/1.0/modules/content/", "encoded")[0]) || textOf(it.getElementsByTagName("encoded")[0])),
+      };
+    });
+    return { title, subtitle, link, updated, items, type: "rss" };
+  }
+
+  throw makeApiError("无法识别的 Feed 格式（非 Atom / RSS 2.0）", sourceUrl);
+}
+async function fetchAndParseRSS(url) {
+  const safe = safeURL(url);
+  if (!safe) throw makeApiError("非法 Feed 地址（仅支持 http/https）", url);
+  let res;
+  try {
+    res = await fetch(safe, { cache: "no-store" });
+  } catch (e) {
+    throw makeApiError("网络请求失败（可能被 CORS 拦截或断网）", safe);
+  }
+  const text = await res.text();
+  if (!res.ok) {
+    throw makeApiError(`HTTP ${res.status}，Feed 不可用`, safe, { httpStatus: res.status, rawSnippet: text.slice(0, 200) });
+  }
+  // 某些接口把 RSS 包在 JSON 里
+  if (text.trim().startsWith("{")) {
+    try {
+      const j = JSON.parse(text);
+      if (typeof j.data === "string") return parseRSSXML(j.data, safe);
+      if (j.rss || j.feed) return parseRSSXML(j.rss || j.feed, safe);
+    } catch {}
+  }
+  return parseRSSXML(text, safe);
+}
+
+/* ================= 导航 / 路由 ================= */
+const NAV = [
+  {k:"home",    ic:"🏠", n:"今日概览"},
+  {k:"hot",     ic:"🔥", n:"全网热榜"},
+  {k:"news",    ic:"💻", n:"科技资讯"},
+  {k:"rss",     ic:"📡", n:"RSS 订阅"},
+  {k:"life",    ic:"✨", n:"每日一刻"},
+  {k:"media",   ic:"🎬", n:"影音娱乐"},
+  {k:"finance", ic:"💱", n:"财经生活"},
+  {k:"weather", ic:"🌤️", n:"天气"},
+  {k:"tools",   ic:"🛠️", n:"实用工具"},
+];
+let current = "home";
+
+function buildNav() {
+  $("nav").innerHTML = NAV.map(n=>
+    `<li role="button" tabindex="0" data-k="${n.k}" class="${n.k===current?"active":""}" aria-current="${n.k===current?"page":"false"}"><span class="ic">${n.ic}</span>${n.n}</li>`
+  ).join("");
+}
+function go(key) {
+  if (!VIEWS[key]) key = "home";
+  current = key;
+  // 递增全局视图 token，使旧视图异步回调失效
+  window.__viewToken = (window.__viewToken || 0) + 1;
+  buildNav();
+  const v = VIEWS[key];
+  $("viewTitle").textContent = v.title;
+  $("viewDesc").textContent = v.desc || "";
+  $("subtabsWrap").innerHTML = "";
+  $("viewBody").innerHTML = SK("加载中…");
+  v.render();
+  location.hash = key;
+  if (window.innerWidth <= 860) $("nav").classList.add("collapsed");
+}
+$("nav").addEventListener("click",(e)=>{
+  const li=e.target.closest("li"); if(!li) return;
+  go(li.dataset.k);
+});
+$("nav").addEventListener("keydown",(e)=>{
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const li=e.target.closest("li"); if(!li) return;
+  e.preventDefault();
+  go(li.dataset.k);
+});
+$("btnRefresh").addEventListener("click",()=>{
+  const btn=$("btnRefresh"); btn.classList.add("spin");
+  VIEWS[current].render();
+  setTimeout(()=>btn.classList.remove("spin"),1000);
+});
+$("menuToggle").addEventListener("click",()=> $("nav").classList.toggle("collapsed"));
+window.addEventListener("hashchange",()=>{
+  const k=(location.hash||"#home").slice(1);
+  if (k !== current) go(k);
+});
+
+buildNav();
+go((location.hash||"#home").slice(1) || "home");
+getJSON("/60s").then(d=>{
+  $("sideDate").textContent=d.date||"";
+  $("sideWeek").textContent=weekName(d.date);
+}).catch(()=>{
+  $("sideDate").textContent=new Date().toISOString().slice(0,10);
+  $("sideWeek").textContent=weekName();
+});
+</script>
+</body>
+</html>
