@@ -44,6 +44,16 @@ VERSION: "1.1.1",
 - RSS 订阅（源码配置于 `config.js`）
 - 每日一刻 / 影音娱乐 / 财经生活 / 天气 / 实用工具
 
+
+## RSS 与 CORS
+
+浏览器无法直接读取多数第三方 RSS（无 CORS）。部署到 Cloudflare Pages 后，页面会走同源代理：
+
+- 前端请求：`/api/rss-proxy?url=...`
+- 实现文件：`functions/api/rss-proxy.js`（Pages Functions，无需额外配置）
+
+本地用 `python -m http.server` 预览时没有该函数，RSS 可能仍因 CORS 失败；以 Cloudflare 线上为准。
+
 ## 本地预览
 
 ```bash
@@ -74,5 +84,6 @@ Pages 项目 → **Custom domains** 绑定域名并按提示配置 DNS。
 
 | 版本 | 说明 |
 |------|------|
+| 1.1.1 | RSS 同源代理，修复第三方 Feed CORS
 | 1.1.0 | 配置外置到 `config.js`；主题优化；天气图标；翻译下拉；精简 RSS |
 | 1.0.0 | 初版单页资讯聚合 |

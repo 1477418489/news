@@ -1456,7 +1456,7 @@ const VIEWS = {
   /* ---------- RSS 订阅（源码配置） ---------- */
   rss: {
     title: "RSS 订阅",
-    desc: "支持 Atom / RSS 2.0 · 订阅源请改根目录 config.js 的 RSS_FEEDS",
+    desc: "支持 Atom / RSS 2.0 · 源配置见 config.js · 经同源代理拉取（解决 CORS）",
     state: { tab: "" },
     render() {
       const feeds = RSS_FEEDS;
@@ -1597,26 +1597,67 @@ function parseRSSXML(xmlText, sourceUrl) {
 
   throw makeApiError("无法识别的 Feed 格式（非 Atom / RSS 2.0）", sourceUrl);
 }
+/** 同源 RSS 代理（Cloudflare Pages Function: /api/rss-proxy） */
+function rssProxyURL(feedUrl) {
+  return `/api/rss-proxy?url=${encodeURIComponent(feedUrl)}`;
+}
+async function fetchTextViaCandidates(urls, label) {
+  let lastErr = null;
+  for (const u of urls) {
+    try {
+      const res = await fetch(u, { cache: "no-store" });
+      const text = await res.text();
+      // 代理失败时可能返回 JSON 错误
+      if (text.trim().startsWith("{")) {
+        try {
+          const j = JSON.parse(text);
+          if (j && j.ok === false) {
+            lastErr = makeApiError(j.message || "代理拉取失败", label, { httpStatus: res.status });
+            continue;
+          }
+        } catch {}
+      }
+      if (!res.ok) {
+        lastErr = makeApiError(`HTTP ${res.status}，Feed 不可用`, label, {
+          httpStatus: res.status,
+          rawSnippet: text.slice(0, 200),
+        });
+        continue;
+      }
+      return { text, via: u };
+    } catch (e) {
+      lastErr = makeApiError(
+        e?.message || "网络请求失败（可能被 CORS 拦截或断网）",
+        label
+      );
+    }
+  }
+  throw lastErr || makeApiError("网络请求失败（可能被 CORS 拦截或断网）", label);
+}
 async function fetchAndParseRSS(url) {
   const safe = safeURL(url);
   if (!safe) throw makeApiError("非法 Feed 地址（仅支持 http/https）", url);
-  let res;
-  try {
-    res = await fetch(safe, { cache: "no-store" });
-  } catch (e) {
-    throw makeApiError("网络请求失败（可能被 CORS 拦截或断网）", safe);
+
+  // 优先走同源代理（解决第三方 Feed 无 CORS 的问题），失败再直连
+  const candidates = [];
+  // Cloudflare Pages / 同源环境
+  if (typeof location !== "undefined" && /^https?:$/.test(location.protocol)) {
+    candidates.push(rssProxyURL(safe));
   }
-  const text = await res.text();
-  if (!res.ok) {
-    throw makeApiError(`HTTP ${res.status}，Feed 不可用`, safe, { httpStatus: res.status, rawSnippet: text.slice(0, 200) });
-  }
+  candidates.push(safe);
+
+  const { text } = await fetchTextViaCandidates(candidates, safe);
+
   // 某些接口把 RSS 包在 JSON 里
   if (text.trim().startsWith("{")) {
     try {
       const j = JSON.parse(text);
       if (typeof j.data === "string") return parseRSSXML(j.data, safe);
       if (j.rss || j.feed) return parseRSSXML(j.rss || j.feed, safe);
-    } catch {}
+      if (j.ok === false) throw makeApiError(j.message || "Feed 代理失败", safe);
+    } catch (e) {
+      if (e?.apiPath) throw e;
+    }
   }
   return parseRSSXML(text, safe);
 }
