@@ -3,15 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1220">
+<meta name="color-scheme" content="dark">
 <title>今日读世界 · 60s 全量资讯</title>
 <style>
   :root {
-    --bg:#0e1014; --bg-side:#14171d; --card:rgba(255,255,255,.055); --card-2:rgba(255,255,255,.03);
-    --card-border:rgba(255,255,255,.09); --text:#e8eaed; --text-dim:#9aa0a6; --text-faint:#676d75;
-    --accent:#4f9dff; --accent-2:#a679ff; --gold:#ffc14d; --warn:#ff6b6b; --green:#4ade80;
-    --shadow:0 8px 30px rgba(0,0,0,.3); --radius:14px;
+    --bg:#0b1220; --bg-side:#101826; --card:rgba(255,255,255,.05); --card-2:#162033;
+    --card-border:rgba(148,163,184,.16); --text:#e8eef8; --text-dim:#a8b3c7; --text-faint:#7b879c;
+    --accent:#3b82f6; --accent-2:#6366f1; --gold:#f5b942; --warn:#f87171; --green:#34d399;
+    --shadow:0 10px 28px rgba(2,8,23,.35); --radius:14px;
+    --input-bg:#162033; --input-text:#e8eef8; --option-bg:#ffffff; --option-text:#111827;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  html{color-scheme:dark}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
     background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none}
@@ -23,7 +27,7 @@
     display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
   .side-brand{padding:22px 20px 14px}
   .side-brand h1{font-size:20px;font-weight:800;letter-spacing:-.4px;
-    background:linear-gradient(120deg,#fff,#9cc4ff 60%,#c6a8ff);
+    background:linear-gradient(120deg,#f8fafc,#93c5fd 55%,#a5b4fc);
     -webkit-background-clip:text;background-clip:text;color:transparent}
   .side-brand p{color:var(--text-faint);font-size:11.5px;margin-top:3px}
   .side-date{padding:0 20px 14px;border-bottom:1px solid var(--card-border);margin-bottom:6px}
@@ -39,7 +43,7 @@
   .side-foot a{color:var(--text-dim)} .side-foot a:hover{color:var(--accent)}
 
   .main{flex:1;min-width:0;overflow-x:hidden}
-  .main-inner{max-width:1180px;margin:0 auto;padding:26px 26px 70px}
+  .main-inner{max-width:1160px;margin:0 auto;padding:28px 28px 72px;position:relative}
   .view-head{display:flex;align-items:center;gap:12px;margin-bottom:4px}
   .view-head h2{font-size:22px;font-weight:800}
   .view-head .refresh{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:var(--card);
@@ -152,13 +156,28 @@
 
   .tool-form{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
   .tool-form input,.tool-form select,.tool-form textarea{
-    background:var(--card-2);border:1px solid var(--card-border);border-radius:10px;color:var(--text);
-    padding:10px 14px;font-size:14px;flex:1;min-width:140px;outline:none}
+    background:var(--input-bg);border:1px solid var(--card-border);border-radius:10px;color:var(--input-text);
+    padding:10px 14px;font-size:14px;flex:1;min-width:140px;outline:none;color-scheme:dark}
+  .tool-form select{
+    appearance:none;-webkit-appearance:none;-moz-appearance:none;
+    background-image:linear-gradient(45deg,transparent 50%,var(--text-dim) 50%),linear-gradient(135deg,var(--text-dim) 50%,transparent 50%);
+    background-position:calc(100% - 16px) calc(50% - 2px),calc(100% - 11px) calc(50% - 2px);
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px;cursor:pointer}
+  /* Native dropdown options: force high-contrast light panel for readability on dark theme */
+  .tool-form select option,.tool-form select optgroup{
+    background:var(--option-bg);color:var(--option-text)}
   .tool-form textarea{min-height:80px;resize:vertical;font-family:inherit}
-  .tool-form input:focus,.tool-form select:focus,.tool-form textarea:focus{border-color:var(--accent)}
+  .tool-form input:focus,.tool-form select:focus,.tool-form textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
   .tool-form button{background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;color:#fff;
     padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;flex:none}
   .tool-form button:hover{opacity:.92}
+  .tool-form button.btn-secondary{background:var(--card);border:1px solid var(--card-border);color:var(--text)}
+  .wx-icon{width:72px;height:72px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));background:rgba(255,255,255,.06);border-radius:16px;padding:8px}
+  .wx-icon.sm{width:36px;height:36px;border-radius:10px;padding:4px;margin:4px auto}
+  .wx-icon.broken{display:none}
+  .app-version{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--text-faint);
+    font-family:"SF Mono",Consolas,monospace;letter-spacing:.2px}
+  .app-version b{color:var(--text-dim);font-weight:600}
   .kv-list li{display:flex;gap:12px;padding:9px 0;border-bottom:1px dashed rgba(255,255,255,.06);font-size:13.5px;align-items:flex-start}
   .kv-list li:last-child{border-bottom:none}
   .kv-list .k{color:var(--text-dim);flex:none;width:110px}
@@ -214,18 +233,6 @@
   .rss-item a:hover .rt{color:var(--accent)}
   .rss-item .rm{font-size:12px;color:var(--text-faint);margin-top:4px}
   .rss-item .rs{font-size:13px;color:var(--text-dim);margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}
-  .rss-manage{display:grid;gap:12px}
-  .rss-row{display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--card-2);
-    border:1px solid var(--card-border);border-radius:11px;flex-wrap:wrap}
-  .rss-row .nm{font-weight:650;flex:1;min-width:120px}
-  .rss-row .url{font-size:12px;color:var(--text-faint);font-family:monospace;word-break:break-all;flex:2;min-width:180px}
-  .rss-row .tag{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(79,157,255,.15);color:#9cc4ff}
-  .rss-row .tag.custom{background:rgba(166,121,255,.15);color:#d0b8ff}
-  .btn-ghost{background:var(--card);border:1px solid var(--card-border);color:var(--text);
-    padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer}
-  .btn-ghost:hover{border-color:rgba(255,255,255,.22)}
-  .btn-danger{border-color:rgba(255,107,107,.4);color:#ffb4b4}
-
   .menu-toggle{display:none}
   @media(max-width:860px){
     .app{flex-direction:column}
@@ -236,7 +243,9 @@
     .nav{display:flex;overflow-x:auto;padding:6px 10px 10px;gap:6px}
     .nav.collapsed{display:none}
     .nav li{white-space:nowrap;margin-bottom:0;padding:8px 13px}
-    .side-foot{display:none}
+    .side-foot{display:block;padding:6px 16px 10px;border-top:1px solid var(--card-border)}
+    .side-foot a{display:none}
+    .side-foot .app-version{margin:0}
     .menu-toggle{display:inline-flex;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:9px;padding:7px 11px;cursor:pointer;font-size:18px}
     .col-3,.col-4,.col-5,.col-6,.col-7,.col-8,.col-9{grid-column:span 12}
     .main-inner{padding:20px 16px 60px}
@@ -254,6 +263,7 @@
     <div class="side-date"><div class="d" id="sideDate">--</div><div class="w" id="sideWeek">加载中…</div></div>
     <ul class="nav" id="nav"></ul>
     <div class="side-foot">
+      <div class="app-version">版本 <b id="appVersion">--</b></div>
       数据来源 <a href="https://github.com/vikiboss/60s" target="_blank" rel="noopener noreferrer">60s API</a><br>
       文档 <a href="https://docs.60s-api.viki.moe" target="_blank" rel="noopener noreferrer">docs.60s-api</a>
     </div>
@@ -273,8 +283,13 @@
     </div>
   </main>
 </div>
+<script src="config.js"></script>
 <script>
-const API = "https://60.newday.cc.cd/v2";
+/* 常用配置见仓库根目录 config.js（VERSION / RSS_FEEDS / API_BASE） */
+const CFG = window.APP_CONFIG || {};
+const API = CFG.API_BASE || "https://60.newday.cc.cd/v2";
+const APP_VERSION = CFG.VERSION || "0.0.0";
+const RSS_FEEDS = Array.isArray(CFG.RSS_FEEDS) ? CFG.RSS_FEEDS : [];
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 /** 仅允许 http(s) 与相对路径，拦截 javascript:/data: 等 */
@@ -291,6 +306,39 @@ function safeURL(u) {
     if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
   } catch {}
   return "";
+}
+/** 解析媒体资源 URL：相对路径优先按 API 根域名拼接，避免挂到当前站点导致图片失效 */
+function mediaURL(u) {
+  if (u == null || u === "") return "";
+  const s = String(u).trim();
+  if (!s || s === "#") return "";
+  if (s.startsWith("data:image/")) return s;
+  try {
+    let abs;
+    if (s.startsWith("//")) abs = "https:" + s;
+    else if (/^https?:\/\//i.test(s)) abs = s;
+    else {
+      // 相对路径按 API 根域名解析，避免挂到 Cloudflare 站点域名
+      const base = new URL(API);
+      abs = s.startsWith("/")
+        ? new URL(s, base.origin).href
+        : new URL(s, base.href.endsWith("/") ? base.href : base.href + "/").href;
+    }
+    const parsed = new URL(abs);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
+    // HTTPS 页面避免混合内容拦截
+    if (typeof location !== "undefined" && location.protocol === "https:" && parsed.protocol === "http:") {
+      parsed.protocol = "https:";
+    }
+    return parsed.href;
+  } catch {
+    return "";
+  }
+}
+function weatherIconImg(url, cls="wx-icon") {
+  const src = mediaURL(url);
+  if (!src) return "";
+  return `<img class="${cls}" src="${esc(src)}" alt="" loading="lazy" decoding="async" onerror="this.classList.add('broken')">`;
 }
 /** CSS url() 安全片段（用于 style 属性） */
 function cssUrl(u) {
@@ -677,7 +725,7 @@ const VIEWS = {
       }, (b,d)=>{
         const w=d.weather||{}, aq=d.air_quality||{}, loc=d.location||{};
         b.innerHTML=`<div class="wx-hero">
-          ${safeURL(w.weather_icon)?`<img src="${esc(safeURL(w.weather_icon))}" width="64" height="64" alt="">`:""}
+          ${weatherIconImg(w.weather_icon || w.icon || w.condition_icon, "wx-icon")}
           <div class="wx-temp">${esc(w.temperature)}°</div>
           <div class="wx-meta">
             <div style="font-size:16px;font-weight:700;color:var(--text)">${esc(loc.city||loc.name)} · ${esc(w.condition)}</div>
@@ -1047,7 +1095,7 @@ const VIEWS = {
           <div class="tool-form">
             <input id="wx-city" value="" placeholder="城市名，如 北京 / 上海 / 深圳">
             <button id="wx-btn">查询</button>
-            <button id="wx-relocate" type="button" style="background:var(--card);border:1px solid var(--card-border);color:var(--text)">按 IP 重定位</button>
+            <button id="wx-relocate" type="button" class="btn-secondary">按 IP 重定位</button>
           </div>
           <div id="wx-out">${SK("定位并查询中…")}</div>
         </section>
@@ -1068,7 +1116,7 @@ const VIEWS = {
           const life=rt.life_indices||[];
           out.innerHTML=`
             <div class="wx-hero">
-              ${safeURL(w.weather_icon)?`<img src="${esc(safeURL(w.weather_icon))}" width="72" height="72" alt="">`:""}
+              ${weatherIconImg(w.weather_icon || w.icon || w.condition_icon, "wx-icon")}
               <div class="wx-temp">${esc(w.temperature)}°</div>
               <div class="wx-meta">
                 <div style="font-size:17px;font-weight:700;color:var(--text)">${esc(loc.city||loc.name)} · ${esc(w.condition)}</div>
@@ -1081,7 +1129,7 @@ const VIEWS = {
             <div class="wx-days">${days.slice(0,10).map(d=>`
               <div class="wx-day">
                 <div class="dt">${esc((d.date||"").slice(5))}</div>
-                ${safeURL(d.day_weather_icon)?`<img src="${esc(safeURL(d.day_weather_icon))}" width="36" height="36" alt="">`:""}
+                ${weatherIconImg(d.day_weather_icon || d.icon || d.weather_icon, "wx-icon sm")}
                 <div class="t">${esc(d.min_temperature)}~${esc(d.max_temperature)}°</div>
                 <div class="c">${esc(d.day_condition)}/${esc(d.night_condition)}</div>
                 <div class="c">AQI ${esc(d.aqi||"-")}</div>
@@ -1405,154 +1453,26 @@ const VIEWS = {
     }
   },
 
-  /* ---------- RSS 订阅（可扩展） ---------- */
+  /* ---------- RSS 订阅（源码配置） ---------- */
   rss: {
     title: "RSS 订阅",
-    desc: "支持 Atom / RSS 2.0 · 内置源可直接阅读 · 自定义源可添加（需目标站点开启 CORS）",
-    /* 内置订阅源：后续扩展只需往这里 push 一项即可 */
-    builtins: [
-      {
-        id: "githubweekly",
-        name: "GitHub 一周热点",
-        url: "https://itcoffee66.github.io/githubweekly/feed.xml",
-        home: "https://itcoffee66.github.io/githubweekly/",
-        desc: "IT咖啡馆 · 每周 GitHub 热门开源",
-      },
-      {
-        id: "60s-rss",
-        name: "60s 每日新闻",
-        url: "https://60.newday.cc.cd/v2/60s/rss",
-        home: "https://github.com/vikiboss/60s",
-        desc: "60s 每日资讯 RSS",
-      },
-      {
-        id: "every-github-rss",
-        name: "每日开源热榜",
-        url: "https://www.gdufe888.top/api/rss.xml",
-        home: "https://www.gdufe888.top",
-        desc: "每日开源热榜",
-      },
-    ],
-    state: { tab: "githubweekly", custom: null },
-    _loadCustom() {
-      try {
-        const raw = JSON.parse(localStorage.getItem("rss-custom-feeds") || "[]");
-        if (!Array.isArray(raw)) return [];
-        // 过滤非法条目，仅保留 https/http
-        return raw.filter(f => f && f.id && f.name && safeURL(f.url)).map(f => ({
-          id: String(f.id).slice(0, 40),
-          name: String(f.name).slice(0, 80),
-          url: safeURL(f.url),
-          home: safeURL(f.home) || "",
-          desc: String(f.desc || "").slice(0, 160),
-        }));
-      } catch { return []; }
-    },
-    _saveCustom(list) {
-      try {
-        localStorage.setItem("rss-custom-feeds", JSON.stringify(list));
-      } catch (e) {
-        throw makeApiError("无法保存到本机（可能超出存储配额）", "localStorage");
-      }
-    },
-    _allFeeds() {
-      const custom = this._loadCustom().map(f => ({ ...f, custom: true }));
-      return [...this.builtins, ...custom];
-    },
+    desc: "支持 Atom / RSS 2.0 · 订阅源请改根目录 config.js 的 RSS_FEEDS",
+    state: { tab: "" },
     render() {
-      this.state.custom = this._loadCustom();
-      const feeds = this._allFeeds();
-      // 若当前 tab 不存在，回退第一个
+      const feeds = RSS_FEEDS;
+      if (!feeds.length) {
+        $("subtabsWrap").innerHTML = "";
+        $("viewBody").innerHTML = `<div class="empty">尚未配置 RSS 源。请编辑仓库根目录 <b>config.js</b> 中的 <code>RSS_FEEDS</code> 后重新部署。</div>`;
+        return;
+      }
       if (!feeds.find(f => f.id === this.state.tab)) {
-        this.state.tab = feeds[0]?.id || "manage";
+        this.state.tab = feeds[0]?.id || "";
       }
-      const tabs = [
-        ...feeds.map(f => ({ k: f.id, n: f.name })),
-        { k: "manage", n: "⚙ 管理源" },
-      ];
+      const tabs = feeds.map(f => ({ k: f.id, n: f.name }));
       makeSubtabs(tabs, this.state.tab, k => { this.state.tab = k; this.render(); });
-      if (this.state.tab === "manage") {
-        this._renderManage();
-      } else {
-        const feed = feeds.find(f => f.id === this.state.tab);
-        $("viewBody").innerHTML = `<div class="grid">${card(12,"📰", feed?.name || "RSS", feed?.desc || "", "c-rss")}</div>`;
-        this._loadFeed(feed);
-      }
-    },
-    _renderManage() {
-      const custom = this._loadCustom();
-      $("viewBody").innerHTML = `<div class="grid">
-        <section class="card col-12">
-          <div class="card-head"><div class="ico">➕</div><h3>添加 RSS / Atom 源</h3></div>
-          <div class="tool-form">
-            <input id="rss-name" placeholder="名称（可选，留空自动读取）" style="max-width:200px">
-            <input id="rss-url" placeholder="Feed 地址，如 https://example.com/feed.xml">
-            <button id="rss-add">添加</button>
-          </div>
-          <div class="note">说明：浏览器直接请求需目标站点设置 CORS；GitHub Pages 等多数静态源可用。添加后保存在本机 localStorage。</div>
-          <div id="rss-add-msg" style="margin-top:10px"></div>
-        </section>
-        <section class="card col-12">
-          <div class="card-head"><div class="ico">📋</div><h3>已配置的源</h3></div>
-          <div class="rss-manage" id="rss-list"></div>
-        </section>
-      </div>`;
-      this._paintList();
-      $("rss-add").onclick = () => this._addFeed();
-    },
-    _paintList() {
-      const box = $("rss-list"); if (!box) return;
-      const rows = this._allFeeds().map(f => `
-        <div class="rss-row" data-id="${esc(f.id)}">
-          <span class="tag ${f.custom?"custom":""}">${f.custom?"自定义":"内置"}</span>
-          <span class="nm">${esc(f.name)}</span>
-          <span class="url">${esc(f.url)}</span>
-          <button class="btn-ghost rss-open" data-id="${esc(f.id)}">打开</button>
-          ${f.custom?`<button class="btn-ghost btn-danger rss-del" data-id="${esc(f.id)}">删除</button>`:""}
-        </div>`).join("");
-      box.innerHTML = rows || `<div class="empty">暂无订阅源</div>`;
-      box.querySelectorAll(".rss-open").forEach(btn => {
-        btn.onclick = () => { this.state.tab = btn.dataset.id; this.render(); };
-      });
-      box.querySelectorAll(".rss-del").forEach(btn => {
-        btn.onclick = () => {
-          const list = this._loadCustom().filter(x => x.id !== btn.dataset.id);
-          this._saveCustom(list);
-          this._paintList();
-        };
-      });
-    },
-    async _addFeed() {
-      const msg = $("rss-add-msg");
-      const rawUrl = ($("rss-url").value || "").trim();
-      let name = ($("rss-name").value || "").trim();
-      if (!rawUrl) { msg.innerHTML = `<div class="err">请填写 Feed 地址</div>`; return; }
-      const url = safeURL(rawUrl);
-      if (!url) { msg.innerHTML = `<div class="err">仅支持 http/https 协议的 Feed 地址</div>`; return; }
-      msg.innerHTML = SK("正在校验 Feed…");
-      try {
-        const feed = await fetchAndParseRSS(url);
-        if (!name) name = feed.title || "未命名源";
-        const id = "c_" + Math.random().toString(36).slice(2, 9);
-        const list = this._loadCustom();
-        if (list.some(x => x.url === url) || this.builtins.some(x => x.url === url)) {
-          throw makeApiError("该 Feed 已存在", url);
-        }
-        if (list.length >= 30) throw makeApiError("自定义源最多 30 个，请先删除部分", url);
-        list.push({
-          id,
-          name: String(name).slice(0, 80),
-          url,
-          home: safeURL(feed.link) || "",
-          desc: String(feed.subtitle || "").slice(0, 160),
-        });
-        this._saveCustom(list);
-        msg.innerHTML = `<div class="tip">已添加「${esc(name)}」，共解析 ${feed.items.length} 条</div>`;
-        $("rss-url").value = ""; $("rss-name").value = "";
-        this._paintList();
-      } catch (e) {
-        fail(msg, e, url);
-      }
+      const feed = feeds.find(f => f.id === this.state.tab);
+      $("viewBody").innerHTML = `<div class="grid">${card(12,"📰", feed?.name || "RSS", feed?.desc || "", "c-rss")}</div>`;
+      this._loadFeed(feed);
     },
     async _loadFeed(feed) {
       const token = makeLoadToken(this);
@@ -1757,6 +1677,8 @@ window.addEventListener("hashchange",()=>{
 });
 
 buildNav();
+if ($("appVersion")) $("appVersion").textContent = APP_VERSION;
+document.title = `今日读世界 · v${APP_VERSION}`;
 go((location.hash||"#home").slice(1) || "home");
 getJSON("/60s").then(d=>{
   $("sideDate").textContent=d.date||"";
