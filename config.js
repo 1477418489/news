@@ -12,7 +12,7 @@
  */
 window.APP_CONFIG = {
   /** 版本号：每次发版手动改，如 "1.1.1" */
-  VERSION: "1.2.0",
+  VERSION: "1.3.0",
 
   /** 60s API 根地址（一般不用动） */
   API_BASE: "https://60.newday.cc.cd/v2",
@@ -49,6 +49,62 @@ window.APP_CONFIG = {
       url: "https://www.gdufe888.top/api/rss.xml",
       home: "https://www.gdufe888.top",
       desc: "每日开源热榜",
+    },
+    {
+      id: "sspai",
+      name: "少数派",
+      url: "https://sspai.com/feed",
+      home: "https://sspai.com",
+      desc: "数字生活与产品体验",
+    },
+    {
+      id: "solidot",
+      name: "Solidot",
+      url: "https://www.solidot.org/index.rss",
+      home: "https://www.solidot.org",
+      desc: "中文科技新闻与行业动态",
+    },
+    {
+      id: "npr-news",
+      name: "NPR 新闻",
+      url: "https://feeds.npr.org/1001/rss.xml",
+      home: "https://www.npr.org/sections/news/",
+      desc: "美国公共媒体综合新闻",
+    },
+    {
+      id: "hacker-news",
+      name: "Hacker News",
+      url: "https://hnrss.org/frontpage",
+      home: "https://news.ycombinator.com",
+      desc: "Hacker News 热门讨论精选",
+    },
+    {
+      id: "ruanyifeng",
+      name: "阮一峰",
+      url: "https://www.ruanyifeng.com/blog/atom.xml",
+      home: "https://www.ruanyifeng.com/blog/",
+      desc: "技术趋势与开发实践",
+    },
+    {
+      id: "simon-willison",
+      name: "Simon Willison",
+      url: "https://simonwillison.net/atom/everything/",
+      home: "https://simonwillison.net",
+      desc: "AI、LLM 与数据工程实践",
+    },
+    {
+      id: "mit-tech-review",
+      name: "MIT 科技评论",
+      url: "https://www.technologyreview.com/feed/",
+      home: "https://www.technologyreview.com",
+      desc: "前沿科技与产业研究",
+    },
+    {
+      id: "nasa-news",
+      name: "NASA",
+      url: "https://www.nasa.gov/news-release/feed/",
+      home: "https://www.nasa.gov/news/",
+      desc: "NASA 官方科学与航天动态",
     },
   ],
 };
