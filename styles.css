@@ -1529,9 +1529,14 @@ button.btn,
 }
 
 .wx-icon {
-  width: 54px;
-  height: 54px;
+  width: 64px;
+  height: 64px;
   flex: none;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  box-shadow: var(--shadow-xs);
   object-fit: contain;
 }
 
@@ -1546,16 +1551,18 @@ button.btn,
 }
 
 .wx-icon.sm {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   margin: 4px auto;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: none;
 }
 
 .wx-icon-fallback {
   display: grid;
   place-items: center;
-  border-radius: var(--radius-sm);
-  background: var(--surface-muted);
   font-size: 28px;
   line-height: 1;
 }
