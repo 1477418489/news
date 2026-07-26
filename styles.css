@@ -1531,7 +1531,18 @@ button.btn,
 .wx-icon {
   width: 54px;
   height: 54px;
+  flex: none;
   object-fit: contain;
+}
+
+.wx-icon-wrap {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+}
+
+.wx-icon-wrap > * {
+  grid-area: 1 / 1;
 }
 
 .wx-icon.sm {
@@ -1540,7 +1551,20 @@ button.btn,
   margin: 4px auto;
 }
 
-.wx-icon.broken {
+.wx-icon-fallback {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.wx-icon-fallback.sm {
+  font-size: 20px;
+}
+
+.wx-icon-fallback[hidden] {
   display: none;
 }
 

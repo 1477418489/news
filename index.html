@@ -108,10 +108,26 @@ function mediaURL(u) {
     return "";
   }
 }
-function weatherIconImg(url, cls="wx-icon") {
+function weatherSymbol(condition) {
+  const text = String(condition || "");
+  if (/雷/.test(text)) return "⛈";
+  if (/雪|冰雹/.test(text)) return "❄";
+  if (/雨/.test(text)) return "🌧";
+  if (/雾|霾|沙|尘/.test(text)) return "🌫";
+  if (/阴/.test(text)) return "☁";
+  if (/云/.test(text)) return "⛅";
+  if (/晴/.test(text)) return "☀";
+  return "◌";
+}
+function weatherIconFallback(cls, condition, hidden=false) {
+  const label = String(condition || "天气");
+  return `<span class="${esc(cls)} wx-icon-fallback" role="img" aria-label="${esc(label)}"${hidden?" hidden":""}>${weatherSymbol(label)}</span>`;
+}
+function weatherIconImg(url, cls="wx-icon", condition="天气") {
   const src = mediaURL(url);
-  if (!src) return "";
-  return `<img class="${cls}" src="${esc(src)}" alt="" loading="lazy" decoding="async" onerror="this.classList.add('broken')">`;
+  const fallback = weatherIconFallback(cls, condition);
+  if (!src) return fallback;
+  return `<span class="wx-icon-wrap"><img class="${esc(cls)}" src="${esc(src)}" alt="${esc(condition || "天气")}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true;this.nextElementSibling.hidden=false">${weatherIconFallback(cls, condition, true)}</span>`;
 }
 /** CSS url() 安全片段（用于 style 属性） */
 function cssUrl(u) {
@@ -530,7 +546,7 @@ const VIEWS = {
       }, (b,d)=>{
         const w=d.weather||{}, aq=d.air_quality||{}, loc=d.location||{};
         b.innerHTML=`<div class="wx-hero">
-          ${weatherIconImg(w.weather_icon || w.icon || w.condition_icon, "wx-icon")}
+          ${weatherIconImg(w.weather_icon || w.condition_icon || w.icon, "wx-icon", w.condition)}
           <div class="wx-temp">${esc(w.temperature)}°</div>
           <div class="wx-meta">
             <div style="font-size:16px;font-weight:700;color:var(--text)">${esc(loc.city||loc.name)} · ${esc(w.condition)}</div>
@@ -921,7 +937,7 @@ const VIEWS = {
           const life=rt.life_indices||[];
           out.innerHTML=`
             <div class="wx-hero">
-              ${weatherIconImg(w.weather_icon || w.icon || w.condition_icon, "wx-icon")}
+              ${weatherIconImg(w.weather_icon || w.condition_icon || w.icon, "wx-icon", w.condition)}
               <div class="wx-temp">${esc(w.temperature)}°</div>
               <div class="wx-meta">
                 <div style="font-size:17px;font-weight:700;color:var(--text)">${esc(loc.city||loc.name)} · ${esc(w.condition)}</div>
@@ -934,7 +950,7 @@ const VIEWS = {
             <div class="wx-days">${days.slice(0,10).map(d=>`
               <div class="wx-day">
                 <div class="dt">${esc((d.date||"").slice(5))}</div>
-                ${weatherIconImg(d.day_weather_icon || d.icon || d.weather_icon, "wx-icon sm")}
+                ${weatherIconImg(d.day_weather_icon || d.weather_icon || d.icon, "wx-icon sm", d.day_condition || d.condition)}
                 <div class="t">${esc(d.min_temperature)}~${esc(d.max_temperature)}°</div>
                 <div class="c">${esc(d.day_condition)}/${esc(d.night_condition)}</div>
                 <div class="c">AQI ${esc(d.aqi||"-")}</div>
