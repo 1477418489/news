@@ -17,7 +17,7 @@
         <div class="brand-mark" aria-hidden="true">今</div>
         <div class="txt2"><h1>今日读世界</h1><p>60s · 全量资讯平台</p></div>
       </div>
-      <button class="menu-toggle" id="menuToggle" aria-label="菜单">☰</button>
+      <button class="menu-toggle" id="menuToggle" type="button" aria-label="打开导航" aria-controls="nav" aria-expanded="false">☰</button>
     </div>
     <div class="side-date">
       <div class="date-pill">
@@ -43,7 +43,6 @@
     <div class="main-inner">
       <div class="view-head">
         <div class="view-title-wrap">
-          <div class="view-kicker">NEWSDESK</div>
           <h2 id="viewTitle">今日概览</h2>
         </div>
         <button class="refresh" id="btnRefresh" title="刷新当前页">
@@ -419,13 +418,43 @@ function renderPosters(list, mapFn) {
   if (!list || !list.length) return `<div class="empty">暂无数据</div>`;
   return `<div class="poster-row">${list.map(mapFn).join("")}</div>`;
 }
+function clearSubtabs() {
+  $("subtabsWrap").innerHTML = "";
+  $("viewBody").removeAttribute("role");
+  $("viewBody").removeAttribute("aria-labelledby");
+}
 function makeSubtabs(tabs, active, onClick) {
-  $("subtabsWrap").innerHTML = `<div class="subtabs">${tabs.map(t=>
-    `<span class="subtab ${t.k===active?"active":""}" data-k="${t.k}">${t.n}</span>`
-  ).join("")}</div>`;
-  $("subtabsWrap").onclick = (e) => {
-    const el = e.target.closest(".subtab"); if (!el) return;
-    onClick(el.dataset.k);
+  if (!tabs.length) { clearSubtabs(); return; }
+  const wrap = $("subtabsWrap");
+  const panel = $("viewBody");
+  const activeIndex = Math.max(0, tabs.findIndex(t => t.k === active));
+  wrap.innerHTML = `<div class="subtabs" role="tablist" aria-label="内容分类">${tabs.map((t,index)=>{
+    const selected = index === activeIndex;
+    return `<button type="button" class="subtab ${selected?"active":""}" id="subtab-${index}" role="tab" aria-selected="${selected}" aria-controls="viewBody" tabindex="${selected?"0":"-1"}" data-k="${esc(t.k)}">${esc(t.n)}</button>`;
+  }).join("")}</div>`;
+  panel.setAttribute("role", "tabpanel");
+  panel.setAttribute("aria-labelledby", `subtab-${activeIndex}`);
+  const tablist = wrap.querySelector(".subtabs");
+  tablist.onclick = (e) => {
+    const el = e.target.closest('[role="tab"]'); if (!el) return;
+    const selectedKey = el.dataset.k;
+    onClick(selectedKey);
+    [...wrap.querySelectorAll('[role="tab"]')]
+      .find(item => item.dataset.k === selectedKey)?.focus();
+  };
+  tablist.onkeydown = (e) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    const items = [...tablist.querySelectorAll('[role="tab"]')];
+    const current = e.target.closest('[role="tab"]');
+    const currentIndex = items.indexOf(current);
+    if (currentIndex < 0 || !items.length) return;
+    let nextIndex = currentIndex;
+    if (e.key === "ArrowLeft") nextIndex = (currentIndex - 1 + items.length) % items.length;
+    if (e.key === "ArrowRight") nextIndex = (currentIndex + 1) % items.length;
+    if (e.key === "Home") nextIndex = 0;
+    if (e.key === "End") nextIndex = items.length - 1;
+    e.preventDefault();
+    items[nextIndex].click();
   };
 }
 
@@ -434,14 +463,14 @@ const VIEWS = {
   home: {
     title: "今日概览", desc: "核心资讯速览 · 其余分类见左侧导航",
     render() {
-      $("subtabsWrap").innerHTML = "";
+      clearSubtabs();
       $("viewBody").innerHTML = `<div class="grid">
-        ${card(12,"📅","摸鱼日历 / 时间进度",null,"c-moyu")}
         ${card(7,"📰","每日 60 秒读懂世界","","c-60s")}
         <section class="card col-5 bing" id="c-bing-wrap">
           <div class="img" id="bingImg"></div><div class="overlay"></div>
           <div class="txt" id="c-bing"><span class="tag">Bing 每日一图</span><h3>加载中…</h3></div>
         </section>
+        ${card(12,"📅","今日进度",null,"c-moyu")}
         ${card(4,"💬","一言",null,"c-hito")}
         ${card(4,"😄","段子",null,"c-duanzi")}
         ${card(4,"🎲","运势",null,"c-luck")}
@@ -449,6 +478,14 @@ const VIEWS = {
         ${card(6,"📜","历史上的今天",null,"c-hist")}
         ${card(12,"🌤️","实时天气（定位中…）",null,"c-wx-home")}
       </div>`;
+      fillCard("c-60s", ()=>getJSON("/60s"), (box,d)=>{
+        $("sideDate").textContent=d.date||""; $("sideWeek").textContent=weekName(d.date);
+        const sub=$("c-60s-sub"); if(sub) sub.textContent=(d.news?.length||0)+" 条";
+        let html=`<ol class="news-list">${(d.news||[]).map(n=>`<li>${esc(n)}</li>`).join("")}</ol>`;
+        if(d.tip) html+=`<div class="tip">提示：${esc(d.tip)}</div>`;
+        html+=`<div class="note">RSS：<a href="${esc(API+"/60s/rss")}" target="_blank" rel="noopener noreferrer">${esc(API+"/60s/rss")}</a></div>`;
+        box.innerHTML=html;
+      });
       fillCard("c-moyu", ()=>getJSON("/moyu"), (box,d)=>{
         const dt=d.date||{}, lu=dt.lunar||{}, td=d.today||{}, pg=d.progress||{};
         const chips=[];
@@ -463,14 +500,6 @@ const VIEWS = {
           <div class="track"><div class="fill" data-w="${p.percentage}"></div></div></div>`:"";
         box.innerHTML=`<div class="moyu-info">${chips.join("")}</div>${bar("周",pg.week)}${bar("月",pg.month)}${bar("年",pg.year)}`;
         requestAnimationFrame(()=>box.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%"));
-      });
-      fillCard("c-60s", ()=>getJSON("/60s"), (box,d)=>{
-        $("sideDate").textContent=d.date||""; $("sideWeek").textContent=weekName(d.date);
-        const sub=$("c-60s-sub"); if(sub) sub.textContent=(d.news?.length||0)+" 条";
-        let html=`<ol class="news-list">${(d.news||[]).map(n=>`<li>${esc(n)}</li>`).join("")}</ol>`;
-        if(d.tip) html+=`<div class="tip">提示：${esc(d.tip)}</div>`;
-        html+=`<div class="note">RSS：<a href="${esc(API+"/60s/rss")}" target="_blank" rel="noopener noreferrer">${esc(API+"/60s/rss")}</a></div>`;
-        box.innerHTML=html;
       });
       (async()=>{
         try{
@@ -772,7 +801,7 @@ const VIEWS = {
             const ncmId = this.state.ncmId;
             const songs=await getJSON("/ncm-rank/"+encodeURIComponent(ncmId));
             if (!isLoadCurrent(this, token) || this.state.tab !== k || this.state.ncmId !== ncmId) return;
-            box.innerHTML=`<div style="margin-bottom:12px"><button type="button" class="subtab" id="ncm-back">← 返回榜单列表</button></div>
+            box.innerHTML=`<div style="margin-bottom:12px"><button type="button" class="back-button" id="ncm-back">← 返回榜单列表</button></div>
               <ul class="film-list">${(songs||[]).slice(0,50).map((s,i)=>{
                 const artist=(s.artist||[]).map(a=>a.name).join(" / ");
                 return `<li><span class="hot-rank">${esc(s.rank||i+1)}</span>
@@ -825,7 +854,7 @@ const VIEWS = {
   finance: {
     title: "财经生活", desc: "汇率 · 金价 · 油价",
     render() {
-      $("subtabsWrap").innerHTML="";
+      clearSubtabs();
       $("viewBody").innerHTML=`<div class="grid">
         ${card(12,"💱","人民币汇率","","c-rate")}
         ${card(6,"🪙","今日金价",null,"c-gold")}
@@ -864,7 +893,7 @@ const VIEWS = {
     title: "天气", desc: "默认按访问 IP 定位城市 · 可手动修改",
     state:{city:""},
     async render() {
-      $("subtabsWrap").innerHTML="";
+      clearSubtabs();
       $("viewBody").innerHTML=`<div class="grid">
         <section class="card col-12">
           <div class="card-head"><div class="ico">🌤️</div><h3>城市天气</h3><span class="sub" id="wx-loc-sub">正在根据 IP 定位…</span></div>
@@ -1237,7 +1266,7 @@ const VIEWS = {
     render() {
       const feeds = RSS_FEEDS;
       if (!feeds.length) {
-        $("subtabsWrap").innerHTML = "";
+        clearSubtabs();
         $("viewBody").innerHTML = `<div class="empty">尚未配置 RSS 源。请编辑仓库根目录 <b>config.js</b> 中的 <code>RSS_FEEDS</code> 后重新部署。</div>`;
         return;
       }
@@ -1571,6 +1600,13 @@ function buildNav() {
     `<li role="button" tabindex="0" data-k="${n.k}" class="${n.k===current?"active":""}" aria-current="${n.k===current?"page":"false"}"><span class="ic">${n.ic}</span>${n.n}</li>`
   ).join("");
 }
+function setMobileMenu(open) {
+  const sidebar = document.querySelector(".sidebar");
+  const toggle = $("menuToggle");
+  sidebar?.classList.toggle("open", open);
+  toggle?.setAttribute("aria-expanded", String(open));
+  toggle?.setAttribute("aria-label", open ? "关闭导航" : "打开导航");
+}
 function go(key) {
   if (!VIEWS[key]) key = "home";
   current = key;
@@ -1580,11 +1616,12 @@ function go(key) {
   const v = VIEWS[key];
   $("viewTitle").textContent = v.title;
   $("viewDesc").textContent = v.desc || "";
-  $("subtabsWrap").innerHTML = "";
+  clearSubtabs();
   $("viewBody").innerHTML = SK("加载中…");
   v.render();
   location.hash = key;
-  if (window.innerWidth <= 860) $("nav").classList.add("collapsed");
+  setMobileMenu(false);
+  window.scrollTo(0, 0);
 }
 $("nav").addEventListener("click",(e)=>{
   const li=e.target.closest("li"); if(!li) return;
@@ -1601,7 +1638,20 @@ $("btnRefresh").addEventListener("click",()=>{
   VIEWS[current].render();
   setTimeout(()=>btn.classList.remove("spin"),1000);
 });
-$("menuToggle").addEventListener("click",()=> $("nav").classList.toggle("collapsed"));
+$("menuToggle").addEventListener("click",()=>{
+  const open = !document.querySelector(".sidebar")?.classList.contains("open");
+  setMobileMenu(open);
+});
+document.addEventListener("keydown",(e)=>{
+  const menuOpen = document.querySelector(".sidebar")?.classList.contains("open");
+  if (e.key === "Escape" && menuOpen) {
+    setMobileMenu(false);
+    $("menuToggle").focus();
+  }
+});
+window.addEventListener("resize",()=>{
+  if (window.innerWidth > 860) setMobileMenu(false);
+});
 window.addEventListener("hashchange",()=>{
   const k=(location.hash||"#home").slice(1);
   if (k !== current) go(k);

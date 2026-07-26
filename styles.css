@@ -35,9 +35,9 @@
   --shadow: var(--shadow-xs);
   --ring: 0 0 0 3px rgba(23, 107, 91, .17);
 
-  /* 圆角三档：控件 sm / 卡片 md / 胶囊 full */
-  --radius-sm: 8px;
-  --radius: 12px;
+  /* 圆角三档：控件 sm / 卡片 md / 状态标记 full */
+  --radius-sm: 6px;
+  --radius: 8px;
   --radius-full: 999px;
 
   /* 动效 */
@@ -201,7 +201,7 @@ button:disabled {
   height: 38px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--accent);
   box-shadow: var(--shadow-xs);
   color: var(--on-accent);
@@ -405,27 +405,18 @@ button:disabled {
 
 .view-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 14px;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .view-title-wrap {
   min-width: 0;
 }
 
-.view-kicker {
-  margin-bottom: 6px;
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-
 .view-head h2 {
   color: var(--text);
-  font-size: 27px;
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.25;
@@ -466,7 +457,7 @@ button:disabled {
 
 .view-desc {
   max-width: 68ch;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
   color: var(--text-dim);
   font-size: 14px;
   line-height: 1.65;
@@ -474,35 +465,45 @@ button:disabled {
 
 .subtabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 4px;
   margin-bottom: 20px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
 }
 
 .subtab {
-  min-height: 34px;
-  padding: 6px 13px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: var(--surface);
+  min-height: 40px;
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
   color: var(--text-dim);
   cursor: pointer;
   font-size: 13px;
-  transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
+  white-space: nowrap;
+  transition: background-color var(--dur-fast) var(--ease), border-bottom-color var(--dur-fast) var(--ease),
               color var(--dur-fast) var(--ease);
 }
 
 .subtab:hover {
-  border-color: var(--border-strong);
   background: var(--surface-hover);
   color: var(--text);
 }
 
 .subtab.active {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
+  border-bottom-color: var(--accent);
+  background: transparent;
+  color: var(--accent-strong);
   font-weight: 600;
+}
+
+.subtab:focus-visible {
+  outline-offset: -3px;
 }
 
 /* ============================================================
@@ -512,7 +513,7 @@ button:disabled {
 .grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 18px;
+  gap: 16px;
 }
 
 .col-3 { grid-column: span 3; }
@@ -527,17 +528,16 @@ button:disabled {
 .card {
   position: relative;
   overflow: hidden;
-  padding: 20px;
+  padding: 19px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow-xs);
-  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease);
 }
 
 .card:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-sm);
 }
 
 .card-glow {
@@ -1026,7 +1026,7 @@ button:disabled {
   overflow: hidden;
   aspect-ratio: 2 / 3;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--surface-muted) center / cover no-repeat;
   box-shadow: var(--shadow-xs);
   transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
@@ -1355,7 +1355,7 @@ button.btn,
   min-height: 32px;
   padding: 5px 11px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text-dim);
   cursor: pointer;
@@ -1408,13 +1408,34 @@ button.btn,
 
 .menu-toggle {
   display: none;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
+}
+
+.back-button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  padding: 7px 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease);
+}
+
+.back-button:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 /* ============================================================
@@ -1688,6 +1709,11 @@ button.btn,
 
   .sidebar.open .nav {
     display: block;
+    flex: none;
+    padding: 8px 10px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--sidebar-bg);
+    box-shadow: var(--shadow-md);
   }
 
   .menu-toggle {
@@ -1712,7 +1738,7 @@ button.btn,
   }
 
   .theme-control {
-    min-height: 38px;
+    min-height: 40px;
     margin: 0;
     padding: 0;
     border-bottom: 0;
@@ -1768,8 +1794,14 @@ button.btn,
   }
 
   .view-head .refresh {
-    min-height: 36px;
+    min-height: 40px;
     padding: 7px 9px;
+  }
+
+  .rss-chip,
+  .back-button,
+  .err-toggle {
+    min-height: 40px;
   }
 
   .grid {
