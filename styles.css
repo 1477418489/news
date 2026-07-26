@@ -268,12 +268,15 @@ button:disabled {
 }
 
 .nav li .ic {
-  width: 7px;
-  height: 7px;
+  display: grid;
+  width: 22px;
+  height: 22px;
   flex: none;
-  border-radius: 50%;
-  background: var(--border-strong);
-  font-size: 0;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-size: 15px;
+  line-height: 1;
   transition: background-color var(--dur-fast) var(--ease);
 }
 
@@ -289,7 +292,7 @@ button:disabled {
 }
 
 .nav li.active .ic {
-  background: var(--accent);
+  background: var(--surface);
 }
 
 .side-foot {
@@ -554,13 +557,15 @@ button:disabled {
 }
 
 .card-head .ico {
-  width: 4px;
-  height: 18px;
+  display: grid;
+  width: 28px;
+  height: 28px;
   flex: none;
-  border: 0;
-  border-radius: 2px;
-  background: var(--accent);
-  font-size: 0;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-size: 16px;
+  line-height: 1;
 }
 
 .card-title {

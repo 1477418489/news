@@ -120,7 +120,7 @@ function cssUrl(u) {
   // 去掉会打断 CSS 的字符
   const cleaned = s.replace(/['"\\)\s\n\r\f]/g, "");
   if (!cleaned || !/^https?:\/\//i.test(cleaned) && !cleaned.startsWith("/")) return "none";
-  return `url("${cleaned}")`;
+  return `url('${cleaned}')`;
 }
 const A = (link, text, cls="") => {
   const href = safeURL(link);
