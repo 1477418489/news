@@ -225,25 +225,110 @@ button:disabled {
 
 .side-date {
   margin-bottom: 8px;
-  padding: 0 14px 16px;
+  padding: 0 17px 15px;
   border-bottom: 1px solid var(--border);
 }
 
-.date-pill {
-  padding: 11px 13px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-muted);
+.today-date-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.today-date-main {
+  min-width: 0;
 }
 
 .side-date .d {
-  font-size: 14px;
-  font-weight: 600;
+  color: var(--text);
+  font-size: 14.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .side-date .w {
-  margin-top: 1px;
+  margin-top: 2px;
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.today-day-type,
+.mobile-today-type {
+  max-width: 90px;
+  flex: none;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface-muted);
+  color: var(--text-dim);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.today-day-type.is-special,
+.mobile-today-type.is-special {
+  border-color: color-mix(in srgb, var(--gold) 28%, var(--border));
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.today-lunar {
+  margin-top: 8px;
+  color: var(--text-faint);
+  font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.today-progress {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.today-progress-item {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  line-height: 1;
+}
+
+.today-progress-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--surface-muted);
+}
+
+.today-progress-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width .45s var(--ease);
+}
+
+.today-progress-item b {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+}
+
+.today-progress-unavailable {
+  color: var(--text-faint);
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .nav {
@@ -466,6 +551,10 @@ button:disabled {
   line-height: 1.65;
 }
 
+.mobile-today-status {
+  display: none;
+}
+
 .subtabs {
   display: flex;
   flex-wrap: nowrap;
@@ -621,42 +710,6 @@ button:disabled {
   background: var(--gold-soft);
   color: var(--gold);
   font-weight: 600;
-}
-
-.prog {
-  margin-bottom: 12px;
-}
-
-.prog:last-child {
-  margin-bottom: 0;
-}
-
-.prog .lbl {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-  color: var(--text-dim);
-  font-size: 12px;
-}
-
-.prog .lbl b {
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
-}
-
-.prog .track {
-  height: 6px;
-  overflow: hidden;
-  border-radius: var(--radius-full);
-  background: var(--surface-muted);
-}
-
-.prog .fill {
-  width: 0;
-  height: 100%;
-  border-radius: var(--radius-full);
-  background: var(--accent);
-  transition: width .45s var(--ease);
 }
 
 /* ============================================================
@@ -1735,6 +1788,41 @@ button.btn,
 
   .side-date {
     display: none;
+  }
+
+  .mobile-today-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 7px 16px;
+    margin: -8px 0 18px;
+    padding: 8px 0 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+
+  .mobile-today-meta {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+  }
+
+  #mobileTodayDate {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .mobile-today-progress {
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   .nav {

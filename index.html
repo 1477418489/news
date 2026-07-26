@@ -19,11 +19,16 @@
       </div>
       <button class="menu-toggle" id="menuToggle" type="button" aria-label="打开导航" aria-controls="nav" aria-expanded="false">☰</button>
     </div>
-    <div class="side-date">
-      <div class="date-pill">
-        <div class="d" id="sideDate">--</div>
-        <div class="w" id="sideWeek">加载中…</div>
+    <div class="side-date" id="sideTodayStatus" aria-label="今日状态" aria-live="polite">
+      <div class="today-date-row">
+        <div class="today-date-main">
+          <div class="d" id="sideDate">--</div>
+          <div class="w" id="sideWeek">加载中…</div>
+        </div>
+        <span class="today-day-type" id="sideDayType">今日</span>
       </div>
+      <div class="today-lunar" id="sideLunar">正在获取农历信息…</div>
+      <div class="today-progress" id="sideProgress">正在获取今日进度…</div>
     </div>
     <ul class="nav" id="nav"></ul>
     <div class="side-foot">
@@ -51,6 +56,13 @@
         </button>
       </div>
       <div class="view-desc" id="viewDesc"></div>
+      <div class="mobile-today-status" id="mobileTodayStatus" aria-label="今日状态" aria-live="polite">
+        <div class="mobile-today-meta">
+          <span id="mobileTodayDate">--</span>
+          <span class="mobile-today-type" id="mobileTodayType">加载中…</span>
+        </div>
+        <div class="mobile-today-progress" id="mobileTodayProgress">进度加载中…</div>
+      </div>
       <div id="subtabsWrap"></div>
       <div id="viewBody"></div>
     </div>
@@ -273,6 +285,104 @@ function weekName(dateStr) {
   const d = dateStr ? new Date(dateStr) : new Date();
   return "星期" + "日一二三四五六"[d.getDay()];
 }
+function localDateString() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+function progressPercentage(item) {
+  if (!item || item.percentage === "" || item.percentage == null) return null;
+  const value = Number(item.percentage);
+  if (!Number.isFinite(value)) return null;
+  return Math.min(100, Math.max(0, value));
+}
+function todayStatusModel(data) {
+  const date = data?.date || {};
+  const lunar = date.lunar || {};
+  const today = data?.today || {};
+  const progress = data?.progress || {};
+  const gregorian = date.gregorian || localDateString();
+
+  let dayType = "";
+  let isSpecialDay = false;
+  if (today.isWorkday) dayType = "工作日";
+  else if (today.isHoliday) {
+    dayType = today.holidayName || "假期";
+    isSpecialDay = true;
+  } else if (today.isWeekend) {
+    dayType = "周末";
+    isSpecialDay = true;
+  }
+
+  const lunarDate = lunar.monthCN
+    ? `农历${lunar.yearGanZhi ? lunar.yearGanZhi + "年 " : ""}${lunar.monthCN}${lunar.dayCN || ""}`
+    : "";
+  const lunarDetails = [
+    lunarDate,
+    lunar.zodiac ? `属${lunar.zodiac}` : "",
+    today.solarTerm ? `节气·${today.solarTerm}` : "",
+  ].filter(Boolean);
+
+  return {
+    gregorian,
+    weekday: date.weekday || weekName(gregorian),
+    dayType: dayType || (data ? "今日" : "状态暂不可用"),
+    isSpecialDay,
+    lunarText: lunarDetails.join(" · "),
+    progress: [
+      { label: "周", value: progressPercentage(progress.week) },
+      { label: "月", value: progressPercentage(progress.month) },
+      { label: "年", value: progressPercentage(progress.year) },
+    ],
+  };
+}
+function formatProgress(value) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, "");
+}
+function renderTodayStatus(data) {
+  const status = todayStatusModel(data);
+  const availableProgress = status.progress.filter(item => item.value != null);
+  const sideDayType = $("sideDayType");
+  const mobileDayType = $("mobileTodayType");
+
+  $("sideDate").textContent = status.gregorian;
+  $("sideWeek").textContent = status.weekday;
+  sideDayType.textContent = status.dayType;
+  sideDayType.classList.toggle("is-special", status.isSpecialDay);
+  const sideLunar = $("sideLunar");
+  sideLunar.textContent = status.lunarText;
+  sideLunar.hidden = !status.lunarText;
+  $("sideProgress").innerHTML = availableProgress.length
+    ? availableProgress.map(item => {
+        const value = formatProgress(item.value);
+        return `<div class="today-progress-item">
+          <span class="today-progress-label">${item.label}</span>
+          <span class="today-progress-track" aria-hidden="true"><span style="width:${item.value}%"></span></span>
+          <b>${value}%</b>
+        </div>`;
+      }).join("")
+    : `<span class="today-progress-unavailable">进度暂不可用</span>`;
+
+  $("mobileTodayDate").textContent = `${status.gregorian} ${status.weekday}`;
+  mobileDayType.textContent = status.dayType;
+  mobileDayType.classList.toggle("is-special", status.isSpecialDay);
+  $("mobileTodayProgress").textContent = availableProgress.length
+    ? availableProgress.map(item => `${item.label} ${formatProgress(item.value)}%`).join(" · ")
+    : "进度暂不可用";
+}
+let todayStatusRequestToken = 0;
+async function loadTodayStatus() {
+  const requestToken = ++todayStatusRequestToken;
+  try {
+    const data = await getJSON("/moyu");
+    if (requestToken !== todayStatusRequestToken) return;
+    renderTodayStatus(data);
+  } catch {
+    if (requestToken !== todayStatusRequestToken) return;
+    renderTodayStatus(null);
+  }
+}
 /* 根据访问 IP 推断天气城市
  * 注意：60s 的 /ip 走 Cloudflare，经常返回美国空城市，不能单独依赖它。
  * 天气接口参数是 query（不是 city），写错会永远回落到北京。
@@ -486,7 +596,6 @@ const VIEWS = {
           <div class="img" id="bingImg"></div><div class="overlay"></div>
           <div class="txt" id="c-bing"><span class="tag">Bing 每日一图</span><h3>加载中…</h3></div>
         </section>
-        ${card(12,"📅","今日进度",null,"c-moyu")}
         ${card(4,"💬","一言",null,"c-hito")}
         ${card(4,"😄","段子",null,"c-duanzi")}
         ${card(4,"🎲","运势",null,"c-luck")}
@@ -495,27 +604,11 @@ const VIEWS = {
         ${card(12,"🌤️","实时天气（定位中…）",null,"c-wx-home")}
       </div>`;
       fillCard("c-60s", ()=>getJSON("/60s"), (box,d)=>{
-        $("sideDate").textContent=d.date||""; $("sideWeek").textContent=weekName(d.date);
         const sub=$("c-60s-sub"); if(sub) sub.textContent=(d.news?.length||0)+" 条";
         let html=`<ol class="news-list">${(d.news||[]).map(n=>`<li>${esc(n)}</li>`).join("")}</ol>`;
         if(d.tip) html+=`<div class="tip">提示：${esc(d.tip)}</div>`;
         html+=`<div class="note">RSS：<a href="${esc(API+"/60s/rss")}" target="_blank" rel="noopener noreferrer">${esc(API+"/60s/rss")}</a></div>`;
         box.innerHTML=html;
-      });
-      fillCard("c-moyu", ()=>getJSON("/moyu"), (box,d)=>{
-        const dt=d.date||{}, lu=dt.lunar||{}, td=d.today||{}, pg=d.progress||{};
-        const chips=[];
-        if(dt.gregorian) chips.push(`<span class="chip">${esc(dt.gregorian)} ${esc(dt.weekday||"")}</span>`);
-        if(lu.monthCN) chips.push(`<span class="chip">农历${esc(lu.yearGanZhi||"")}年 ${esc(lu.monthCN)}${esc(lu.dayCN||"")}</span>`);
-        if(lu.zodiac) chips.push(`<span class="chip">属${esc(lu.zodiac)}</span>`);
-        if(td.solarTerm) chips.push(`<span class="chip hot">节气·${esc(td.solarTerm)}</span>`);
-        if(td.isWorkday) chips.push(`<span class="chip">工作日</span>`);
-        else if(td.isHoliday) chips.push(`<span class="chip hot">${esc(td.holidayName||"假期")}</span>`);
-        else if(td.isWeekend) chips.push(`<span class="chip hot">周末</span>`);
-        const bar=(name,p)=>p?`<div class="prog"><div class="lbl"><span>本${name}已过</span><b>${p.percentage}%</b></div>
-          <div class="track"><div class="fill" data-w="${p.percentage}"></div></div></div>`:"";
-        box.innerHTML=`<div class="moyu-info">${chips.join("")}</div>${bar("周",pg.week)}${bar("月",pg.month)}${bar("年",pg.year)}`;
-        requestAnimationFrame(()=>box.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%"));
       });
       (async()=>{
         try{
@@ -1652,6 +1745,7 @@ $("nav").addEventListener("keydown",(e)=>{
 $("btnRefresh").addEventListener("click",()=>{
   const btn=$("btnRefresh"); btn.classList.add("spin");
   VIEWS[current].render();
+  loadTodayStatus();
   setTimeout(()=>btn.classList.remove("spin"),1000);
 });
 $("menuToggle").addEventListener("click",()=>{
@@ -1676,14 +1770,8 @@ window.addEventListener("hashchange",()=>{
 buildNav();
 if ($("appVersion")) $("appVersion").textContent = APP_VERSION;
 document.title = `今日读世界 · v${APP_VERSION}`;
+loadTodayStatus();
 go((location.hash||"#home").slice(1) || "home");
-getJSON("/60s").then(d=>{
-  $("sideDate").textContent=d.date||"";
-  $("sideWeek").textContent=weekName(d.date);
-}).catch(()=>{
-  $("sideDate").textContent=new Date().toISOString().slice(0,10);
-  $("sideWeek").textContent=weekName();
-});
 </script>
 </body>
 </html>

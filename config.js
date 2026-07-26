@@ -12,7 +12,7 @@
  */
 window.APP_CONFIG = {
   /** 版本号：每次发版手动改，如 "1.1.1" */
-  VERSION: "1.7.0",
+  VERSION: "1.8.0",
 
   /** 60s API 根地址（一般不用动） */
   API_BASE: "https://60.newday.cc.cd/v2",
